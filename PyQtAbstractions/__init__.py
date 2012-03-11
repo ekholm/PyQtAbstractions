@@ -5,7 +5,7 @@
 # * Modications to this file must be reported to above email
 
 """
-Module provided by inka
+Module provided by PyQtAbstractions
 This module provides nice to have features that has evolved during my
 work with Python and more recently with Python bindings of Qt
 

@@ -19,11 +19,11 @@ import re
 import sys
 import threading
 
-import inka.__decorators__ as __decorators__
+import PyQtAbstractions.__decorators__ as __decorators__
 
-from inka.decorators import on_dbus_signal_send
-from inka.decorators import on_dbus_signal_receive
-from inka.decorators import dbus_method
+from PyQtAbstractions.decorators import on_dbus_signal_send
+from PyQtAbstractions.decorators import on_dbus_signal_receive
+from PyQtAbstractions.decorators import dbus_method
 
 Exception = dbus.DBusException
 

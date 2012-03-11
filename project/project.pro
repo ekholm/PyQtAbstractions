@@ -2,7 +2,7 @@
 
 QT       += core gui
 
-TARGET = inka
+TARGET = PyQtAbstractions
 TEMPLATE = app
 
 SOURCES += 

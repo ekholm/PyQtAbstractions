@@ -13,22 +13,22 @@ except ImportError:
 
 scripts = []
 data_files = [ 
-    ('inka', glob.glob('src/*'))
+    ('PyQtAbstractions', glob.glob('src/*'))
     ]
  
 distutils.core.setup(
-    name="inka",
+    name="PyQtAbstractions",
     version      = "1.0",
     author       = "Mattias Ekholm",
     author_email = "code@ekholm.se",
-    url          = "http://www.ekholm.se/",
+    url          = "http://www.ekholm.se/code/",
     
-    license  = "All rights reserved",
+    license  = "GPL v2 with restriction rights reserved",
     
-    description      = "Inka software package",
-    long_description = "Inka software package",
+    description      = "PyQtAbstractions software package",
+    long_description = "PyQtAbstractions software package",
     
-    packages  = ['inka'],
+    packages  = ['PyQtAbstractions'],
     
     platforms = "any",
     

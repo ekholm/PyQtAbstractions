@@ -13,12 +13,12 @@ import sys
 import dbus.mainloop.qt
 
 try:
-    from   inka.decorators     import *
-    import inka.decorators     as decorators
-    import inka.__decorators__ as __decorators__
-    from   inka.__qt_modules__ import *
+    from   PyQtAbstractions.decorators     import *
+    import PyQtAbstractions.decorators     as decorators
+    import PyQtAbstractions.__decorators__ as __decorators__
+    from   PyQtAbstractions.__qt_modules__ import *
 
-    import inka.Spectrum
+    import PyQtAbstractions.Spectrum
 
 except:
     import os
@@ -29,8 +29,8 @@ except:
     import __decorators__ as __decorators__
     from   __qt_modules__ import *
 
-if Qt.isPySide: import inka.pyside_resource
-if Qt.isPyQt4:  import inka.pyqt4_resource
+if Qt.isPySide: import PyQtAbstractions.pyside_resource
+if Qt.isPyQt4:  import PyQtAbstractions.pyqt4_resource
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Not used...
@@ -117,9 +117,9 @@ class Base(object):
         self._ui = _load_ui(form)
         self._settings = Settings()
         
-        if isinstance(self._ui, inka.Qt.MainWindow)     \
-                or isinstance(self._ui, inka.Qt.Dialog) \
-                or Qt.isPyKDE and isinstance(self._ui, inka.Qt.Applet):
+        if isinstance(self._ui, PyQtAbstractions.Qt.MainWindow)     \
+                or isinstance(self._ui, PyQtAbstractions.Qt.Dialog) \
+                or Qt.isPyKDE and isinstance(self._ui, PyQtAbstractions.Qt.Applet):
 
             self._ui._setParent(self)
             self._ui._restoreSettings()
@@ -758,7 +758,7 @@ if Qt.isPySide:
                 name = self._header.strip()
                 cls  = self._class.strip()
 
-                (fp, path, desc) = imp.find_module(name) # , ['.', 'inka'])
+                (fp, path, desc) = imp.find_module(name)
 
                 loaded = (name in sys.modules) and (sys.modules[name] != None)
                 if not loaded:

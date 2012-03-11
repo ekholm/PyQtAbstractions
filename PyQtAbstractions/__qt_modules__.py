@@ -11,6 +11,10 @@ __pyside__ = ('PySide' in sys.modules) and (sys.modules['PySide'] != None)
 __pyqt4__  = ('PyQt4'  in sys.modules) and (sys.modules['PyQt4']  != None)
 __pykde4__ = ('PyKDE4' in sys.modules) and (sys.modules['PyKDE4'] != None)
 
+#print 'PySide' in sys.modules
+#print 'PyQt4'  in sys.modules
+#print 'PyKDE4' in sys.modules
+
 # We can't have both PySide and PyQt4 at the same time
 if (__pyside__ and __pyqt4__) or (__pyside__ and __pykde4__):
     print 'Both PySide and PyQt4 is loaded'

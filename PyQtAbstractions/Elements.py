@@ -10,7 +10,7 @@ This module contains the base class for the element handler
 
 __all__ = []
 
-from inka import *
+from PyQtAbstractions import *
 
 # This table is from PyMca
 Elements = [

@@ -11,8 +11,8 @@ UI element actions to methods.
 
 import sys
 
-import inka.__decorators__ as __decorators__
-import inka.Qt
+import PyQtAbstractions.__decorators__ as __decorators__
+import PyQtAbstractions.Qt
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 
@@ -132,8 +132,8 @@ def _signal_add_decorator(name, type):
             # print '_signal_add_decorator', name, sig, args, kargs
             _on_signal_action_helper(f, (sig, type))
             f._on_signal_args = (args, kargs)
-            # f.__pyqtSignature__ = inka.QtCore.pyqtSignature('char*')
-            # return inka.QtCore.Slot(*args, **kargs)(f)
+            # f.__pyqtSignature__ = PyQtAbstractions.QtCore.pyqtSignature('char*')
+            # return PyQtAbstractions.QtCore.Slot(*args, **kargs)(f)
             #return f 
         return signal_action_helper
     method.__doc__  = "This method %s decorates signal handler for %s" % (name, type)

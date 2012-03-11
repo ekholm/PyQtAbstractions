@@ -9,7 +9,7 @@ import re
 import sys
 import types
 
-# import inka.decorators as decorators
+# import PyQtAbstractions.decorators as decorators
 import decorators
 
 from __qt_modules__ import *

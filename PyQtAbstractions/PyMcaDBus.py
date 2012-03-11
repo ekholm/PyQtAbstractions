@@ -4,12 +4,12 @@
 # Licence is LGPL 2, with following restriction
 # * Modications to this file must be reported to above email
 
-# TODO: inka
+# TODO: PyQtAbstractions
 
 import QSource
 
 import PyQt4
-from inka import *
+from PyQtAbstractions import *
 
 import dbus
 import dbus.mainloop.glib
@@ -90,7 +90,7 @@ class DBus:
         self._parent = parent
 
         self._dbus         = dbus.SessionBus() 
-        self._dbus_service = "se.inka.pymca"
+        self._dbus_service = "se.PyQtAbstractions.pymca"
         self._dbus_peer    = self._dbus_connect()
         self._dbus.call_on_disconnection(self._dbus_disconnected)
 

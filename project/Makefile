@@ -1,11 +1,11 @@
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 
-all: ../inka/pyqt4_resource.py ../inka/pyside_resource.py
+all: ../PyQtAbstractions/pyqt4_resource.py ../PyQtAbstractions/pyside_resource.py
 
-../inka/pyqt4_resource.py: resource.qrc forms/pyMcaDBus.ui forms/elements.ui forms/elementInfo.ui
+../PyQtAbstractions/pyqt4_resource.py: resource.qrc forms/pyMcaDBus.ui forms/elements.ui forms/elementInfo.ui
 	@pyrcc4 -o $@ $<
 
-../inka/pyside_resource.py: resource.qrc forms/pyMcaDBus.ui forms/elements.ui forms/elementInfo.ui
+../PyQtAbstractions/pyside_resource.py: resource.qrc forms/pyMcaDBus.ui forms/elements.ui forms/elementInfo.ui
 	@pyside-rcc -o $@ $<
 
 clean:
@@ -18,4 +18,4 @@ install: all
 	echo "Nothing to do: start server first and then client"
 
 tar: clean
-	tar --exclude inka -zcvf $(HOME)/inka.tgz *
+	tar --exclude PyQtAbstractions -zcvf $(HOME)/PyQtAbstractions.tgz *
