@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/"> 
+        <file>icons/crystal_clear/32x32/actions/reload.png</file>
+        <file>forms/pyMcaDBus.ui</file>
+        <file>forms/elements.ui</file>
+        <file>forms/elementInfo.ui</file>
+    </qresource>
+</RCC>
