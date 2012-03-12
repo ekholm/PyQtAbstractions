@@ -18,7 +18,7 @@ class Handler(object):
             return False
 
         self._sm = sm(self, self._owner)
-        self._sm.init(*args, **args)
+        self._sm.init(*args, **kargs)
 
         return self._sm.start()
 
@@ -35,7 +35,7 @@ class Base(object):
     # <state> : (<action>, [<action method>+], <new state method>)
 
     def __init__(self, handler, owner):
-        self._handler = hander
+        self._handler = handler
         self.owner    = owner
         self.current  = 'start'
 
@@ -46,8 +46,8 @@ class Base(object):
         self.action(None) 
         return True
         
-    def action(self, action):
-        print """SM: action "%s" in state "%s" """ % (action, self.current)
+    def action(self, event):
+        # print """SM: event "%s" in state "%s" """ % (event, self.current)
 
         # if action is None, then it's the default action
         #if action not in self.matrix and action != None:
@@ -61,9 +61,9 @@ class Base(object):
             actions = [actions]
 
         # Traverse all action entries for state
-        for (a, fl, n) in actions:
+        for (e, fl, n) in actions:
             # if correct action entry, do the action
-            if a == action:
+            if e == event:
                 doneAction = True
 
                 # the list of functions might be a single item, 
@@ -74,6 +74,7 @@ class Base(object):
                 # now traverse the list and do all actions
                 for f in fl:
                     if f != None:
+                        # print """SM: action "%s" in state "%s" """ % (f.__name__, self.current)
                         doneAction = True
                         f()
 
@@ -89,16 +90,18 @@ class Base(object):
                     return
 
         # Here we check that we really has done any action for the state
-        # if not there is some error
-        if not doneAction and action != None:
-            print """Untreated action "%s" in state "%s" """ % (action, self.current)
+        # if not there is some error... or it completely normal
+        if not doneAction and event != None:
+            print """Untreated event "%s" in state "%s" """ % (event, self.current)
 
     def getState(self):
         return self.current
 
     def _newState(self, state):
+        # print """SM: trans "%s" -> "%s" """ % (self.current, state)
+
         if state == 'done':
-            self.handler.set(None)
+            self._handler.set(None)
             return 
 
         if state not in self.matrix:
