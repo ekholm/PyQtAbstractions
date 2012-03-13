@@ -58,8 +58,9 @@ if __pyqt4__ or __pykde4__:
 
     PyQt.__version__ = QtCore.PYQT_VERSION_STR
 
-    QtCore.Signal = QtCore.pyqtSignal
-    QtCore.Slot   = QtCore.pyqtSlot
+    QtCore.Signal        = QtCore.pyqtSignal
+    QtCore.Slot          = QtCore.pyqtSlot
+    QtCore.QSize.toTuple = lambda self : (self.width(), self.height())
 
     QtGui.QMessageBox.StandardButton.Yes    = QtGui.QDialogButtonBox.Yes
     QtGui.QMessageBox.StandardButton.No     = QtGui.QDialogButtonBox.No

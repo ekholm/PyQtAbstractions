@@ -111,8 +111,9 @@ def _add_signals(cls):
 def _create_signal_slot(self, f):
     for (n, t) in f._on_signal_operation:
         (args, kargs) = f._signal_types[n]
-        f = QtCore.Slot(*args, **kargs)(f)
-        setattr(self, f.__name__, f)
+        if not Qt.isPyQt4:
+            f = QtCore.Slot(*args, **kargs)(f)
+            setattr(self, f.__name__, f)
         return getattr(self, f.__name__)
 
 def _create_signal_slots(cls):
@@ -124,8 +125,9 @@ def _create_signal_slots(cls):
             if not hasattr(f, '_signal_types'):
                 f._signal_types = dict()
             f._signal_types[n] = (args, kargs)
-            #f = QtCore.Slot(*args, **kargs)(f)
-            #setattr(cls, f.__name__, types.MethodType(f, cls))
+            #if Qt.isPyQt4:
+            #    f = QtCore.Slot(*args, **kargs)(f)
+            #    setattr(cls, f.__name__, f)
 
             # print 'func', args
             # print f.func_dict

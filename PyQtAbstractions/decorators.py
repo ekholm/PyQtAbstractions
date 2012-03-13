@@ -51,12 +51,12 @@ def ui_class(cls):
     A decorator that shall be used for a class using ui deocarators
     """
 
-    __decorators__._add_signals(cls)
-
     global _dbus_methods
     global _signal_methods
     global _ui_methods
-    
+
+    __decorators__._add_signals(cls)
+
     # print cls.__name__, _ui_methods, _dbus_methods, _signal_methods
     def make_unique_names(cls, methods, pref):
         n = 0
