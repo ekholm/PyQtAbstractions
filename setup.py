@@ -9,7 +9,10 @@ try:
     import PySide
     
 except ImportError:
-    raise ImportError, "You must have PySide installed"
+    try:
+        import PyQt4
+    except:
+        raise ImportError, "You must have PySide or PyQt4 installed"
 
 scripts = []
 data_files = [ 

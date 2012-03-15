@@ -193,8 +193,13 @@ for (n, t) in [('action',           'triggered'),
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # DBus decorators
 
-from dbus.service import signal as on_dbus_signal_send
-from dbus.service import method as dbus_method
+# TODO: do this nicer...
+try:
+    from dbus.service import signal as on_dbus_signal_send
+    from dbus.service import method as dbus_method
+except:
+    def on_dbus_signal_send(*args): pass
+    def dbus_method(*args): pass
 
 def _dbus_on_action_helper(f, obj):
     """

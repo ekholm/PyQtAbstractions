@@ -1,8 +1,28 @@
 <RCC>
-    <qresource prefix="/"> 
-        <file>icons/crystal_clear/32x32/actions/reload.png</file>
-        <file>forms/pyMcaDBus.ui</file>
-        <file>forms/elements.ui</file>
-        <file>forms/elementInfo.ui</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>forms/pyMcaDBus.ui</file>
+    <file>forms/elementInfo.ui</file>
+    <file>forms/elements.ui</file>
+    <file>icons/crystal_clear/32x32/devices/floppy_unmount.png</file>
+    <file>icons/crystal_clear/32x32/apps/kgoldrunner.png</file>
+    <file>icons/crystal_clear/32x32/apps/quick_restart.png</file>
+    <file>icons/crystal_clear/32x32/apps/kfilereplace.png</file>
+    <file>icons/crystal_clear/32x32/apps/restart.png</file>
+    <file>icons/crystal_clear/32x32/apps/cache.png</file>
+    <file>icons/crystal_clear/32x32/apps/ksame.png</file>
+    <file>icons/crystal_clear/32x32/apps/katomic.png</file>
+    <file>icons/crystal_clear/32x32/minetypes/ps.png</file>
+    <file>icons/crystal_clear/32x32/save_as.xcf</file>
+    <file>icons/crystal_clear/32x32/save_as.png</file>
+    <file>icons/crystal_clear/32x32/actions/fileprint.png</file>
+    <file>icons/crystal_clear/32x32/actions/exit.png</file>
+    <file>icons/crystal_clear/32x32/actions/run.png</file>
+    <file>icons/crystal_clear/32x32/actions/filenew.png</file>
+    <file>icons/crystal_clear/32x32/actions/filequickprint.png</file>
+    <file>icons/crystal_clear/32x32/actions/view_top_bottom.png</file>
+    <file>icons/crystal_clear/32x32/actions/info.png</file>
+    <file>icons/crystal_clear/32x32/actions/reload.png</file>
+    <file>icons/crystal_clear/COPYING.txt</file>
+    <file>icons/crystal_clear/README.txt</file>
+  </qresource>
 </RCC>
