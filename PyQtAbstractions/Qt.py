@@ -38,7 +38,7 @@ if Qt.isPySide: import PyQtAbstractions.pyside_resource
 if Qt.isPyQt4:  import PyQtAbstractions.pyqt4_resource
 
 # choose application
-if   Qt.isPyKDE4: 
+if Qt.isPyKDE4: 
     import PyQtAbstractions.__applet__      as __app__
     import PyQtAbstractions.__application__ 
     Object = PyQtAbstractions.__application__._Object

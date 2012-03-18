@@ -22,7 +22,7 @@ class _Object(QtCore.QObject, Base):
         # Load the UI form that represents the main window
         self._createUI(self._mainForm)
 
-        self.showMessage("Unknown") 
+        # self.showMessage("Unknown") 
 
     def _about(self):
         return ""
@@ -31,7 +31,6 @@ class _Object(QtCore.QObject, Base):
         if not hasattr(self._ui, 'statusBar'):
             return
 
-        return
         if Qt.isPySide:
             self._ui.statusBar().showMessage(msg, tmo)         
         else:
