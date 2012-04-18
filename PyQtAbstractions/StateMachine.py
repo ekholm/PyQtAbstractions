@@ -46,7 +46,7 @@ class Base(object):
         self.action(None) 
         return True
         
-    def action(self, event):
+    def action(self, event, *args):
         # print """SM: event "%s" in state "%s" """ % (event, self.current)
 
         # if action is None, then it's the default action
@@ -76,7 +76,7 @@ class Base(object):
                     if f != None:
                         # print """SM: action "%s" in state "%s" """ % (f.__name__, self.current)
                         doneAction = True
-                        f()
+                        f(args)
 
                 # now we check if we need to change state, 
                 # if new state is a method, call it to get new state

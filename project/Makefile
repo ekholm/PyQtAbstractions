@@ -37,8 +37,8 @@ clean:
 	@echo "Cleaning"
 	@rm -rf ../build
 	@find .. -name 'resource.qrc' -exec rm '{}' \;
-	@find .. -name '.pyc' -exec rm '{}' \;
-	@find .. -name '*~'   -exec rm '{}' \;
+	@find .. -name '*.pyc'        -exec rm '{}' \;
+	@find .. -name '*~'           -exec rm '{}' \;
 	@find .. -name '*_resource.*' -exec rm '{}' \;
 
 
