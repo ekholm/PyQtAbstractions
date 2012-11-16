@@ -66,10 +66,15 @@ class USB(Base):
         initializes the interfaces and end-points
         """
 
-        print "Found device 0x%04x:0x%04x at %s:%s" % (self._dev.idVendor, 
-                                                       self._dev.idProduct, 
-                                                       self._dev.bus, 
-                                                       self._dev.address)
+        try:
+            print "Found device 0x%04x:0x%04x at %s:%s" % (self._dev.idVendor, 
+                                                           self._dev.idProduct, 
+                                                           self._dev.bus, 
+                                                           self._dev.address)
+        except:
+            print "Found device 0x%04x:0x%04x" % (self._dev.idVendor, 
+                                                  self._dev.idProduct)
+            
         # Force it into a known state and reset it
         try:
             self._dev.set_configuration()
@@ -181,10 +186,14 @@ class USB(Base):
         """
 
         desc = "USB device:\n"
-        desc += "\t%04x:%04x at %s:%s\n" % (self._dev.idVendor, 
-                                            self._dev.idProduct, 
-                                            self._dev.bus, 
-                                            self._dev.address)
+        desc += "\t%04x:%04x" % (self._dev.idVendor, 
+                                            self._dev.idProduct)
+        try:
+            desc += " at %s:%s\n" % (self._dev.bus, 
+                                     self._dev.address)
+        except:
+            pass
+
         desc += "\t%s %s\n" % (usb.util.get_string(self._dev, 1024, 1), 
                                usb.util.get_string(self._dev, 1024, 2))
         desc += "\tit has %d interfaces (with %d variants), which has %d endpoints" % (

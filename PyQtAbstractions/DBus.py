@@ -69,6 +69,11 @@ def add_service_arguments(parser):
                        dest   = '_dbus_restart', 
                        action = 'store_true', 
                        help   = "Force restart of daemon if running")
+    group.add_argument('-n', '--no-daemon',
+                       dest    = '_dbus_go_daemon',
+                       action  = 'store_false',
+                       default = 'store_true',
+                       help   = "Don't start as a daemon")
     group.add_argument('-e', '--exit', 
                        dest   = '_dbus_kill', 
                        action = 'store_true', 
@@ -128,9 +133,13 @@ def startService(service, handler, *args, **kargs):
     # enable multi threading
     gobject.threads_init()
 
+    class MyClient(Client):
+        def showMessage(self, msg, tmo):
+            print msg
+
     # Test if daemon is already running
     if isServiceStarted(service):
-        peer = Client(service)
+        peer = MyClient(service)
         if handler._dbus_kill:
             try:
                 peer._dbus_peer.exit()
@@ -150,7 +159,9 @@ def startService(service, handler, *args, **kargs):
         sys.exit()
 
     # We turn our self into a daemon
-    _goDaemon()
+
+    if handler._dbus_go_daemon:
+        _goDaemon()
 
     print "%s daemon: %s" % (service, os.getpid())
 

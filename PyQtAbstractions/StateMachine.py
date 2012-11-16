@@ -29,6 +29,8 @@ class Handler(object):
             return lambda *args, **kargs : None
 
 class Base(object):
+    _debug = False
+
     # <state> : (<action>, <action method>,    <new state>)
     # <state> : (<action>, <action method>,    <new state method>)
     # <state> : (<action>, [<action method>+], <new state>)
@@ -47,7 +49,8 @@ class Base(object):
         return True
         
     def action(self, event, *args):
-        # print """SM: event "%s" in state "%s" """ % (event, self.current)
+        if self._debug:
+            print """SM: event "%s" in state "%s" """ % (event, self.current)
 
         # if action is None, then it's the default action
         #if action not in self.matrix and action != None:
@@ -74,9 +77,13 @@ class Base(object):
                 # now traverse the list and do all actions
                 for f in fl:
                     if f != None:
-                        # print """SM: action "%s" in state "%s" """ % (f.__name__, self.current)
+                        if self._debug:
+                            print """SM: action "%s" in state "%s" """ % (f.__name__, self.current)
                         doneAction = True
-                        f(args)
+                        if args != ():
+                            f(args)
+                        else:
+                            f()
 
                 # now we check if we need to change state, 
                 # if new state is a method, call it to get new state
@@ -98,7 +105,8 @@ class Base(object):
         return self.current
 
     def _newState(self, state):
-        # print """SM: trans "%s" -> "%s" """ % (self.current, state)
+        if self._debug:
+            print """SM: trans "%s" -> "%s" """ % (self.current, state)
 
         if state == 'done':
             self._handler.set(None)
