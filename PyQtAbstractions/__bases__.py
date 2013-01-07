@@ -164,6 +164,31 @@ class _Settings(QtCore.QSettings):
                 self._setVal(attr, val)
         self.endGroup()
 
+    def restoreAll(self, ui, grp, pre = None):
+        """
+        Restore all settings in a group
+        """
+
+        self.beginGroup(grp)
+        for e in self.allKeys():
+            val = self.value(e, None)
+
+            if pre != None:
+                attr = getattr(ui, "%s%s" % (pre, e))
+                self._setVal(attr, val)
+            else:
+                try:
+                    val = int(val)
+                except:
+                    try:
+                        val = float(val)
+                    except:
+                        print e, val
+
+            setattr(ui, e, val)
+        self.endGroup()
+
+
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Common base class for Widgets and widget users 
 
