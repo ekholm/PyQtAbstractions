@@ -183,7 +183,7 @@ class _Settings(QtCore.QSettings):
                     try:
                         val = float(val)
                     except:
-                        print e, val
+                        pass
 
             setattr(ui, e, val)
         self.endGroup()
