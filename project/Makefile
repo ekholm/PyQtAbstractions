@@ -13,11 +13,11 @@ all: $(RES_FILES) $(UI_FILES)
 resources: $(RES_FILES)
 $(SRC)/pyqt4_resource.py: resource.qrc $(UI_FILES)
 	@echo "Buildning resource file: \"$@\""
-	@pyrcc4 -o $@ $<
+	@(which pyrcc4 > /dev/null 2>&1 && pyrcc4 -o $@ $<) || echo "Skipped: $@"
 
 $(SRC)/pyside_resource.py: resource.qrc $(UI_FILES)
 	@echo "Buildning resource file: \"$@\""
-	@pyside-rcc -o $@ $<
+	@(which pyside-rcc > /dev/null 2>&1 && pyside-rcc -o $@ $<) || echo "Skipped: $@"
 
 .PHONY: resource.qrc
 resource.qrc: cleanRes

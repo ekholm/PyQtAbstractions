@@ -48,17 +48,20 @@ class _Settings(QtCore.QSettings):
     Help class for our application settings
     """
 
-    def __init__(self):
+    def __init__(self, appName = None):
         """
         Constructor that creates the storage location for the application settings
         """
 
+        if appName == None:
+            appName = QtGui.QApplication.applicationName()
+        
         if os.name == 'posix':
             format = QtCore.QSettings.NativeFormat
             location = QtGui.QDesktopServices.HomeLocation
             settingsFile = QtGui.QDesktopServices.storageLocation(location)
             settingsFile += "/.%s" % QtGui.QApplication.organizationDomain()
-            settingsFile += "/%s.conf" % QtGui.QApplication.applicationName()
+            settingsFile += "/%s.conf" % appName
             QtCore.QSettings.__init__(self, settingsFile, QtCore.QSettings.NativeFormat)
         else:
             #format = QtCore.QSettings.IniFormat
