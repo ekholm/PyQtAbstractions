@@ -242,13 +242,13 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
             
         QtGui.QMessageBox.about(self, " " + self.windowTitle() + " ", txt)
 
-    @on_ui_action('action_About_Qt')
-    def _(self):
-        """
-        Handles the about Qt request from the UI
-        """
-
-        QtGui.QMessageBox.aboutQt(self, " " + self.windowTitle() + " ")
+    #@on_ui_action('action_About_Qt')
+    #def _(self):
+    #    """
+    #    Handles the about Qt request from the UI
+    #    """
+    #
+    #    QtGui.QMessageBox.aboutQt(self, " " + self.windowTitle() + " ")
 
     def _restoreSettings(self):
         """

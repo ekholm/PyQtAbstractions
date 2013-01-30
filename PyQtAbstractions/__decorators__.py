@@ -44,6 +44,32 @@ def isActionAdded(self, name, elem, action, func):
 
     return False
 
+def _addOperations(self, name):
+    # mo      = self.metaObject()
+    op_name = '_on_%s_operation' % (name)
+    
+    for elem in dir(self):
+        if not hasattr(self, elem):
+            continue 
+        func = getattr(self, elem)
+        if not inspect.ismethod(func):
+            continue
+        # print 'addOperations:', func.im_class, func.im_self, func.im_func
+        # Add method hooks for the UI 
+        if not hasattr(func, op_name):
+            continue
+        # Iterate over all objects to listen to
+        for action in getattr(func, op_name):
+            if action[0] == 'pre':
+                # print action
+                (_, op_func, params) = action
+                op_func(self, name, elem, params, func)
+            else:
+                (elem, action) = action
+                # print 'addOperaions:', name, elem, action, func
+                op_func = eval('_%s_add_action_helper' % (name))
+                op_func(self, name, elem, action, func)
+
 def addActions(self):
     """
     Help method that adds all the connection for a class
@@ -52,27 +78,20 @@ def addActions(self):
     if hasattr(self, '_ui'):
         addActions(self._ui)
 
-    def addOperations(self, name):
-        # mo      = self.metaObject()
-        op_name = '_on_%s_operation' % (name)
-        op_func = eval('_%s_add_action_helper' % (name))
-    
-        for elem in dir(self):
-            if not hasattr(self, elem):
-                continue 
-            func = getattr(self, elem)
-            if inspect.ismethod(func):
-                # print func.im_class, func.im_self, func.im_func
-                # Add method hooks for the UI 
-                if hasattr(func, op_name):
-                    # Iterate over all objects to listen to
-                    for (elem, action) in getattr(func, op_name):
-                        # print 'addOperaions:', name, elem, action, func
-                        op_func(self, name, elem, action, func)
-    
-    addOperations(self, 'dbus')
-    addOperations(self, 'signal')
-    addOperations(self, 'ui')
+    for name in ['dbus', 'signal', 'ui']:
+        _addOperations(self, name)
+
+# run decorators that need to be executed prior to instatiation
+def addPreActions(cls):
+    """
+    Help method that adds all the connection for a class
+    """
+
+    if hasattr(cls, '_ui'):
+        addActions(cls._ui)
+
+    for name in ['dbus', 'signal', 'ui']:
+        _addOperations(cls, '%s_pre' % name)    
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Signal/Slots
@@ -198,7 +217,7 @@ def _ui_add_action(self, elem, action, func):
     """
 
     if not hasattr(self, elem) and not (action == 'short-cut'):
-        # print 'Unknown attribute: %s %s' % (elem, action)
+        # print 'Unknown attribute:', self, elem, action, func
         return
     
     if action == 'value-changed':
@@ -216,7 +235,10 @@ def _ui_add_action(self, elem, action, func):
                     action.triggered.connect(func)
                     self.addAction(action)
                 else:
+                    #print '_ui_add_action connecting:', self.__class__.__name__, elem, a, func.__name__
+                    #print '    ', getattr(self, elem)
                     ui = getattr(getattr(self, elem), a)
+                    #print '    ', ui
                     ui.connect(func)
         except:
             pass
@@ -229,7 +251,7 @@ def _ui_add_action_helper(self, name, elem, action, func):
     func   - call back function
     """
 
-    # print '_ui_add_action_helper', name, elem, action, func.__name__
+    # print '_ui_add_action_helper', self, name, elem, action, func.__name__
 
     # handle either the application class or a widget directly
     # TODO: for short-cuts this does not work properly
@@ -245,12 +267,11 @@ def _ui_add_action_helper(self, name, elem, action, func):
                 # print 'pattern', self, obj, o, elem, action, func
                 _ui_add_action(obj, o, action, func)
     else:
-        # print '_ui_add_action_helper', self, elem, action, func
+        # print '_ui_add_action_helper', self, name, elem, action, func
         _ui_add_action(obj, elem, action, func)
                          
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # DBus decorators
-
 def _dbus_add_action_helper(self, name, elem, action, func):
     """
     name   - type of operation 'dbus'
@@ -262,6 +283,7 @@ def _dbus_add_action_helper(self, name, elem, action, func):
     # print '_dbus_add_action_helper', name, elem, action, func.__name__
 
     if hasattr(self, '_dbus_service'):
+        # print name, elem, action, func
         dbus_iface = self._dbus_service + ".iface"
         if not isActionAdded(self, 'dbus', elem, dbus_iface + "." + action, func.__name__):
             self._dbus_add_signal_receiver(elem, dbus_iface, func)

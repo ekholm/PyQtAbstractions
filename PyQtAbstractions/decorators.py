@@ -10,6 +10,7 @@ UI element actions to methods.
 """
 
 import sys
+import dbus
 
 import PyQtAbstractions.__decorators__ as __decorators__
 import PyQtAbstractions.Qt
@@ -29,7 +30,7 @@ __all__ = [
     
     'on_signal_receive',
     
-    'dbus_method',
+    'on_dbus_method',
     'on_dbus_signal_send',
     'on_dbus_signal_receive',
     
@@ -37,11 +38,12 @@ __all__ = [
     ]
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+#
 _dbus_methods   = []
 _signal_methods = []
-_signal_types   = dict()
 _ui_methods     = []
-# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+
+_signal_types   = dict()
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Make sure that action method got unique names
@@ -65,7 +67,7 @@ def ui_class(cls):
             name = "_%s_%s_action_%d" % (cls.__name__, pref, n)
             n += 1
         
-            # print cls.__name__, f.__name__, name, f
+            #print cls.__name__, f.__name__, name, f
             # print cls.__name__, f.__name__, name, f._on_ui_operation
         
             if not hasattr(cls, f.__name__):
@@ -73,7 +75,7 @@ def ui_class(cls):
                 continue 
 
             #if f.__code__ == getattr(cls, f.__name__).__code__:
-            #    # print 'skips', f.__name__, name
+                # print 'skips', f.__name__, name
             #    def skip():
             #        print 'This should never happen'
             #        pass
@@ -93,7 +95,10 @@ def ui_class(cls):
 
     if hasattr(cls, '_'):
         # print 'deletes _'
-        del cls._
+        try:
+            del cls._
+        except:
+            pass
 
     _signal_methods = __decorators__._create_signal_slots(cls)
 
@@ -152,7 +157,8 @@ def _ui_on_action_helper(f, obj):
     """
     Interal help method that adds the decoration for the method
     """
-    
+
+    # print f, obj
     if hasattr(f, '_on_ui_operation'):
         l = getattr(f, '_on_ui_operation')
     else:
@@ -193,36 +199,42 @@ for (n, t) in [('action',           'triggered'),
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # DBus decorators
 
-# TODO: do this nicer...
 try:
-    from dbus.service import signal as on_dbus_signal_send
-    from dbus.service import method as dbus_method
+    from dbus.service import signal as _dbus_service_signal
+    from dbus.service import method as _dbus_service_method
 except:
-    def on_dbus_signal_send(*args): pass
-    def dbus_method(*args): pass
+    def _dbus_signal_send(*args): pass
+    def _dbus_method(*args): pass
 
-def _dbus_on_action_helper(f, obj):
+def _dbus_on_action_helper(name, f, obj):
     """
     Interal help method that adds the decoration for the method
     """
 
-    if hasattr(f, '_on_dbus_operation'):
-        l = getattr(f, '_on_dbus_operation')
+    if isinstance(f, tuple):
+        (t, op, f) = f
+        obj = (t, op, obj)
+
+        attr = '_on_%s_pre_operation' % (name)
+    else:
+        attr = '_on_%s_operation' % (name)
+
+    if hasattr(f, attr):
+        l = getattr(f, attr)
     else:
         global _dbus_methods
         _dbus_methods += [f]
         l = []
-
+        
     l += [obj]
-
-    f._on_dbus_operation = l
+    setattr(f, attr, l)
 
 def _dbus_add_decorator(name, type):
     name = 'on_dbus_%s' % (name)
     def method(*args):
         def dbus_action_helper(f):
             for sig in args:
-                _dbus_on_action_helper(f, (sig, type))
+                _dbus_on_action_helper('dbus', f, (sig, type))
                 
             return f
         return dbus_action_helper
@@ -231,8 +243,53 @@ def _dbus_add_decorator(name, type):
     
     setattr(sys.modules[__name__], method.__name__, method)
 
+def _dbus_add_pre_decorator(name, ff):
+    # print '_dbus_add_pre_decorator', name, ff
+    name = 'on_dbus_%s' % (name)
+    def method(*args, **kargs):
+        # print '_dbus_add_pre_decorator:method', args, kargs
+        def dbus_action_helper(f):
+            # print '_dbus_add_pre_decorator:method:dbus_action_helper', f
+            _dbus_on_action_helper('dbus', ('pre', _dbus_add_pre_action, f), (ff, args, kargs))
+
+            return f
+        return dbus_action_helper
+    method.__doc__  = "This method %s decorates signal handler for %s" % (name, type)
+    method.__name__ = name
+    
+    setattr(sys.modules[__name__], method.__name__, method)
+
+# name is dbus
+# elem is decorated function name
+# action is parameters 
+# func is 
+def _dbus_add_pre_action(self, name, elem, action, func):
+    (f, args, kargs) = action 
+
+    if len(args) != 0:
+        func = f(*args, **kargs)(func)
+    else:
+        func = f(self._dbus_iface, **kargs)(func)
+
+    setattr(self, func.__name__, func)
+
+def _on_dbus_signal_send(iface = None):
+    if iface == None:
+        pass
+    else:
+        return _dbus_signal_send
+
 for (n, t) in [('signal_receive', 'signal')]:
     _dbus_add_decorator(n, t)
+
+for (n, t) in [('signal_send', _dbus_service_signal)]: # , ('method', _dbus_service_method)]:
+    _dbus_add_pre_decorator(n, t)
+
+def on_dbus_method(dbus_interface = None, in_signature=None, out_signature=None):
+    if dbus_interface:
+        return dbus.service.method(dbus_interface, in_signature, out_signature)
+    else:
+        return dbus.service.method("com.orexplore.replace", in_signature, out_signature)
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Thread decorators

@@ -18,12 +18,13 @@ import os
 import re
 import sys
 import threading
+import inspect
 
 import PyQtAbstractions.__decorators__ as __decorators__
 
 from PyQtAbstractions.decorators import on_dbus_signal_send
 from PyQtAbstractions.decorators import on_dbus_signal_receive
-from PyQtAbstractions.decorators import dbus_method
+from PyQtAbstractions.decorators import on_dbus_method
 
 Exception = dbus.DBusException
 
@@ -117,13 +118,34 @@ def isServiceStarted(service):
 
     return False
 
+# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+# DBUS
+def _updateMethodInterfaces(cls):
+    tag   = "com.orexplore.replace"
+    iface = cls._dbus_iface
+
+    for elem in dir(cls):
+        if not hasattr(cls, elem):
+            continue 
+        func = getattr(cls, elem)
+        if not inspect.ismethod(func):
+            continue
+
+        if not hasattr(func, '_dbus_interface'):
+            continue
+
+        if getattr(func, '_dbus_interface') == tag:
+            setattr(func.__func__, '_dbus_interface', iface)
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
-# DBUS 
-def startService(service, handler, *args, **kargs):
+#
+def startService(handler, *args, **kargs):
     """
     This function creates a DBUS service and starts the handler
     """
+
+    __decorators__.addPreActions(handler)
+    _updateMethodInterfaces(handler)
 
     # service = kargs.pop('dbus_service')
 
@@ -138,8 +160,8 @@ def startService(service, handler, *args, **kargs):
             print msg
 
     # Test if daemon is already running
-    if isServiceStarted(service):
-        peer = MyClient(service)
+    if isServiceStarted(handler._dbus_service):
+        peer = MyClient(handler._dbus_service)
         if handler._dbus_kill:
             try:
                 peer._dbus_peer.exit()
@@ -152,7 +174,8 @@ def startService(service, handler, *args, **kargs):
             pass
 
         else:
-            print "%s daemon already started with pid %s" % (service, peer._dbus_peer.getPid())
+            print "%s daemon already started with pid %s" % (handler._dbus_service,
+                                                             peer._dbus_peer.getPid())
             sys.exit(1)
 
     if handler._dbus_kill:
@@ -163,11 +186,13 @@ def startService(service, handler, *args, **kargs):
     if handler._dbus_go_daemon:
         _goDaemon()
 
-    print "%s daemon: %s" % (service, os.getpid())
+    print "%s daemon: %s" % (handler._dbus_service, os.getpid())
 
     # Create the service channel and connect the service object to it
     loop = gobject.MainLoop()
-    obj  = handler(loop, service, *args, **kargs)
+    obj  = handler(loop, *args, **kargs)
+
+    # obj.WriteShortCmd = d(handler.WriteShortCmd)
 
     # enter event loop that handled the RPCs
     loop.run()
@@ -268,6 +293,8 @@ class Base(object):
         self._dbus_path    = path
         self._dbus_service = service
 
+        print 'Using DBUS', self._dbus_service
+
     def _showMessage(self, msg, tmo = 0):
         print msg
 
@@ -294,7 +321,7 @@ class Client(Base):
         self._dbus.call_on_disconnection(self._dbus_disconnected)
 
         __decorators__.addActions(self)
-        
+
     def _dbus_add_signal_receiver(self, signal, iface, func):
         """
         This method adds a DBUS signal receiver and ties it to an instance
@@ -420,10 +447,12 @@ class Service(dbus.service.Object, Base):
     The DBus base class for services
     """
     
-    def __init__(self, loop, service):
+    def __init__(self, loop):
         """
         Constructor
         """
+
+        service = self._dbus_service
 
         self._loop    = loop
         self._txLock  = threading.RLock()
@@ -432,10 +461,11 @@ class Service(dbus.service.Object, Base):
 
         # dbus.server.Server(dbus.SessionBus(), _objs[service], self._dbus)
         Base.__init__(self, service)
+
         dbus.service.Object.__init__(self, self._dbus, self._dbus_path)
         self._dbus_name = dbus.service.BusName(self._dbus_service, self._dbus)
 
-    @dbus_method(dbus_iface, in_signature='', out_signature='')
+    @on_dbus_method(dbus_iface, in_signature='', out_signature='')
     def exit(self):
         """
         A Client request to terminate the service
@@ -446,7 +476,7 @@ class Service(dbus.service.Object, Base):
         self._dbus.close()
         # self._loop.quit()
 
-    @dbus_method(dbus_iface, in_signature='', out_signature='i')
+    @on_dbus_method(dbus_iface, in_signature='', out_signature='i')
     def getVersion(self):
         """
         A Client request for the service version
@@ -454,7 +484,7 @@ class Service(dbus.service.Object, Base):
 
         return self._version
 
-    @dbus_method(dbus_iface, in_signature='', out_signature='i')
+    @on_dbus_method(dbus_iface, in_signature='', out_signature='i')
     def getPid(self):
         """
         A Client request for the service process id
@@ -462,7 +492,7 @@ class Service(dbus.service.Object, Base):
 
         return os.getpid()
 
-    @dbus_method(dbus_iface, in_signature='', out_signature='(ss)')
+    @on_dbus_method(dbus_iface, in_signature='', out_signature='(ss)')
     def getInfo(self):
         """
         A Client request for version and process id
