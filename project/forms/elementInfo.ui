@@ -167,7 +167,7 @@
   <customwidget>
    <class>ElementInfo</class>
    <extends>QFrame</extends>
-   <header>inka/Elements</header>
+   <header>PyQtAbstractions/Elements</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
-# Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
+# Copyrighted 2011 - 2013 Mattias Ekholm <code@ekholm.se>
 
 import distutils.core 
 import glob

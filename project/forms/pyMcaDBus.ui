@@ -134,7 +134,7 @@
   <customwidget>
    <class>DBusWidget</class>
    <extends>QWidget</extends>
-   <header>inka/PyMcaDBus</header>
+   <header>PyQtAbstractions/PyMcaDBus</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

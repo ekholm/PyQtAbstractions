@@ -3916,13 +3916,13 @@
   <customwidget>
    <class>ElementWidget</class>
    <extends>QWidget</extends>
-   <header>inka/Elements</header>
+   <header>PyQtAbstractions/Elements</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ElementButton</class>
    <extends>QPushButton</extends>
-   <header>inka/Elements</header>
+   <header>PyQtAbstractions/Elements</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
