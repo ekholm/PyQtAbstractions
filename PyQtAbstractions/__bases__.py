@@ -17,7 +17,7 @@ def _load_ui(form):
     A Method that can be used when loading 
     Internal method that load a form representing an UI element
     """
-        
+
     fp = QtCore.QFile(form)
     fp.open(QtCore.QIODevice.ReadOnly)
 
@@ -29,11 +29,11 @@ def _load_ui(form):
         elif Qt.isPyQt4:
             widget = QtUiTools.loadUi(fp)
         else:
-            print "don't know what to do..."
+            print("don't know what to do...")
             sys.exit(1)
     except Exception, e:
-        print 'Failed to load form: "%s"' % (form)
-        print 'Parser returned: ', e
+        print('Failed to load form: "{:s}"'.format(form))
+        print('Parser returned: {}'.format(e))
         sys.exit(1)
         
     finally:
@@ -48,27 +48,27 @@ class _Settings(QtCore.QSettings):
     Help class for our application settings
     """
 
-    def __init__(self, appName = None):
+    def __init__(self, appName = None, orgDom = None):
         """
         Constructor that creates the storage location for the application settings
         """
 
-        if appName == None:
-            appName = QtGui.QApplication.applicationName()
+        if appName == None: appName = QtGui.QApplication.applicationName()
+        if orgDom  == None: orgDom  = QtGui.QApplication.organizationDomain()
         
         if os.name == 'posix':
             format = QtCore.QSettings.NativeFormat
             location = QtGui.QDesktopServices.HomeLocation
             settingsFile = QtGui.QDesktopServices.storageLocation(location)
-            settingsFile += "/.%s" % QtGui.QApplication.organizationDomain()
-            settingsFile += "/%s.conf" % appName
+            settingsFile += "/.{:s}".format(orgDom)
+            settingsFile += "/{:s}.conf".format(appName)
             QtCore.QSettings.__init__(self, settingsFile, QtCore.QSettings.NativeFormat)
         else:
             #format = QtCore.QSettings.IniFormat
             #location = QtGui.QDesktopServices.DataLocation
             #settingsFile = QtGui.QDesktopServices.storageLocation(location)
-            #settingsFile += "/%s" % QtGui.QApplication.organizationDomain()
-            #settingsFile += "/%s.conf" % QtGui.QApplication.applicationName()
+            #settingsFile += "/{:s}".format(QtGui.QApplication.organizationDomain())
+            #settingsFile += "/{:s}.conf".format(QtGui.QApplication.applicationName())
             QtCore.QSettings.__init__(self)
 
     def value(self, key, defaultValue = None):
@@ -97,7 +97,7 @@ class _Settings(QtCore.QSettings):
         elif isinstance(attr, QtGui.QSlider):
             return attr.value()
         else:
-            print 'Type not handled: %s' % (type(attr))
+            print('Type not handled: {:s}'.format(type(attr)))
             sys.exit()
 
     @classmethod
@@ -119,7 +119,7 @@ class _Settings(QtCore.QSettings):
         elif isinstance(attr, QtGui.QSlider):
             attr.setValue(int(val))
         else:
-            print 'Type not handled: %s' % (type(attr))
+            print('Type not handled: {:s}'.format(type(attr)))
             sys.exit()
 
     def save(self, ui, grp, pre, *items):
@@ -129,7 +129,7 @@ class _Settings(QtCore.QSettings):
 
         self.beginGroup(grp)
         for e in items:
-            attr = getattr(ui, "%s%s" % (pre, e))
+            attr = getattr(ui, "{:s}{:s}".format(pre, e))
             val = self._getVal(attr)
             self.setValue(e, val)
         self.endGroup()
@@ -147,7 +147,7 @@ class _Settings(QtCore.QSettings):
     def saveVars(self, grp, **vars):
         self.beginGroup(grp)
         for k in vars.keys():
-            print k, vars[k]
+            print(k, vars[k])
             self.setValue(k, vars[k])
         self.endGroup()
 
@@ -160,7 +160,7 @@ class _Settings(QtCore.QSettings):
         for e in items:
             val = self.value(e, None)
             if val:
-                attr = getattr(ui, "%s%s" % (pre, e))
+                attr = getattr(ui, "{:s}{:s}".format(pre, e))
                 self._setVal(attr, val)
         self.endGroup()
 
@@ -174,7 +174,7 @@ class _Settings(QtCore.QSettings):
             val = self.value(e, None)
 
             if pre != None:
-                attr = getattr(ui, "%s%s" % (pre, e))
+                attr = getattr(ui, "{:s}{:s}".format(pre, e))
                 self._setVal(attr, val)
             else:
                 try:
@@ -199,7 +199,7 @@ class Base(object):
             if hasattr(self, '_mainForm'):
                 self._mainForm = self._mainForm
             else:
-                print "Error: form is missing"
+                print("Error: form is missing")
                 sys.exit(1)
         
     def run(self):
@@ -253,7 +253,7 @@ class Base(object):
         Method that sets the parent attribute
         """
 
-        print 'set parent not called'
+        print('set parent not called')
         # signal.signal(signal.SIGINT, self.sigint)
         
         self._parent   = parent

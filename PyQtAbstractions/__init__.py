@@ -13,5 +13,5 @@ Prior to importing this module, one must import one of
 PySide, PyQt4 or PyKDE4
 """
 
-from Qt         import *
+from .Qt         import *
 from decorators import *

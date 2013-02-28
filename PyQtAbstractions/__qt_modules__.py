@@ -11,18 +11,18 @@ __pyside__ = ('PySide' in sys.modules) and (sys.modules['PySide'] != None)
 __pyqt4__  = ('PyQt4'  in sys.modules) and (sys.modules['PyQt4']  != None)
 __pykde4__ = ('PyKDE4' in sys.modules) and (sys.modules['PyKDE4'] != None)
 
-#print 'PySide' in sys.modules
-#print 'PyQt4'  in sys.modules
-#print 'PyKDE4' in sys.modules
+#print('PySide' in sys.modules)
+#print('PyQt4'  in sys.modules)
+#print('PyKDE4' in sys.modules)
 
 # We can't have both PySide and PyQt4 at the same time
 if (__pyside__ and __pyqt4__) or (__pyside__ and __pykde4__):
-    print 'Both PySide and PyQt4 is loaded'
+    print('Both PySide and PyQt4 is loaded')
     sys.exit(1)
 
 # No bindings are loaded
 if not (__pyside__ or __pyqt4__ or __pykde4__):
-    print 'No QT bindings are loaded'
+    print('No QT bindings are loaded')
     sys.exit(1)
     
 # we choose to only export the selected Qt bindings
@@ -53,7 +53,8 @@ if __pyqt4__ or __pykde4__:
     from PyQt4 import QtCore
     from PyQt4 import QtGui
     from PyQt4 import QtSvg
-    from PyQt4 import QtOpenGL 
+    # from PyQt4 import QtOpenGL 
+    def QtOpenGL(): pass
     from PyQt4 import uic as QtUiTools
 
     PyQt.__version__ = QtCore.PYQT_VERSION_STR

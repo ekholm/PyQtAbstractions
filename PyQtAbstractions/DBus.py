@@ -44,7 +44,7 @@ def _doFork():
         if pid > 0:
             sys.exit(0) 
     except OSError, e: 
-        print >>sys.stderr, "fork failed: %d (%s)" % (e.errno, e.strerror) 
+        print("fork failed: {:d} ({:s})".format(e.errno, e.strerror), file=sys.stderr)
         sys.exit(1)
 
 def _goDaemon():
@@ -99,7 +99,7 @@ def findServices(service):
     services = []
     for a in bus.list_names():
         if pattern.match(a):
-            print bus.get_object(a, path)
+            print(bus.get_object(a, path))
             if bus.get_object(a, '/'):
                 services += [a]
 
@@ -137,27 +137,63 @@ def _updateMethodInterfaces(cls):
         if getattr(func, '_dbus_interface') == tag:
             setattr(func.__func__, '_dbus_interface', iface)
 
+
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
-#
-def startService(handler, *args, **kargs):
-    """
-    This function creates a DBUS service and starts the handler
-    """
+def preProcessHandler(handlers):
+    if type(handlers) != list:
+        handlers = [handlers]
+        
+    for h in handlers:
+        __decorators__.addPreActions(h)
+        if hasattr(h, '_dbus_iface'):
+            _updateMethodInterfaces(h)
 
-    __decorators__.addPreActions(handler)
-    _updateMethodInterfaces(handler)
-
-    # service = kargs.pop('dbus_service')
-
-    # Use glib event loop, on the server side
     dbus.mainloop.glib.DBusGMainLoop(set_as_default = True)
-    
-    # enable multi threading
     gobject.threads_init()
 
+def postProcessHandler(handlers, *args, **kwargs):
+    try:
+        call_when_done = kwargs.get('call_when_done', None)
+        del kwargs['call_when_done']
+    except:
+        pass
+
+    try:
+        call_when_client_created = kwargs.get('call_when_client_created', None)
+        del kwargs['call_when_client_created']
+    except:
+        pass
+
+    try:
+        supply_loop = kwargs.get('supply_loop', None)
+        del kwargs['supply_loop']
+    except:
+        pass
+
+    if type(handlers) != list:
+        handlers = [handlers]
+        
+    clients = []
+    loop = gobject.MainLoop()
+    for h in handlers:
+        h._loop = loop
+        obj     = h(h._loop, *args, **kwargs)
+        if call_when_client_created:
+            call_when_client_created(obj)
+        clients += [obj]
+
+    if call_when_done:
+        call_when_done(*clients)
+    
+    if supply_loop:
+        supply_loop(loop)
+
+    loop.run()
+
+def enforceSolitude(handler):
     class MyClient(Client):
         def showMessage(self, msg, tmo):
-            print msg
+            print(msg)
 
     # Test if daemon is already running
     if isServiceStarted(handler._dbus_service):
@@ -174,28 +210,36 @@ def startService(handler, *args, **kargs):
             pass
 
         else:
-            print "%s daemon already started with pid %s" % (handler._dbus_service,
-                                                             peer._dbus_peer.getPid())
+            print("{:s} daemon already started with pid {:s}".format(handler._dbus_service,
+                                                                     peer._dbus_peer.getPid()))
             sys.exit(1)
 
-    if handler._dbus_kill:
-        sys.exit()
+# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+#
+def startClients(handler, *args, **kwargs):
+    """
+    This function creates a DBUS client and starts the handler
+    """
 
-    # We turn our self into a daemon
+    preProcessHandler(handler)
+    postProcessHandler(handler, *args, **kwargs)
+   
 
-    if handler._dbus_go_daemon:
-        _goDaemon()
+# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+#
+def startService(handler, *args, **kwargs):
+    """
+    This function creates a DBUS service and starts the handler
+    """
 
-    print "%s daemon: %s" % (handler._dbus_service, os.getpid())
+    preProcessHandler(handler)
+    enforceSolitude(handler)
+    if handler._dbus_kill:      sys.exit()
+    if handler._dbus_go_daemon: _goDaemon()
 
-    # Create the service channel and connect the service object to it
-    loop = gobject.MainLoop()
-    obj  = handler(loop, *args, **kargs)
+    print("{:s} daemon: {:s}".format(handler._dbus_service, os.getpid()))
 
-    # obj.WriteShortCmd = d(handler.WriteShortCmd)
-
-    # enter event loop that handled the RPCs
-    loop.run()
+    postProcessHandler(handler, *args, **kwargs)
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Handlers to the dbus connection
@@ -211,16 +255,16 @@ class NoService:
         
         self._parent = parent
 
-    def default(self, name, *args, **kargs):
+    def default(self, name, *args, **kwargs):
         """
         Updates the status bar in the application with a no-connection notification
         """
 
-        self._parent.showMessage("Service not connected", 1000)
-        # print "No connection when using '%s'" % (name) # : %s" % (args)
+        self._parent.showMessage("Service not connected: {:s}".format(self._parent.__class__.__name__), 1000)
+        # print("No connection when using '{:s}'".format(name) # : {:s}".format(args))
         return None
 
-    def exit(self, **kargs):
+    def exit(self, **kwargs):
         """
         Ignore exit commands
         """
@@ -232,19 +276,19 @@ class NoService:
         Remap all function calls to our default method
         """
 
-        return lambda *args, **kargs: self.default(n, args, kargs)
+        return lambda *args, **kwargs: self.default(n, args, kwargs)
 
 class Remote(object):
     """
     This class handles the interfaces implemented by the remote object
     """
     
-    def _bridge(self, f, **kargs):
+    def _bridge(self, f, **kwargs):
         """
         Calls the given proxy method with its arguments
         """
         
-        return eval("self._dbus_ciface.%s(**kargs)" % (f))
+        return eval("self._dbus_ciface.{:s}(**kwargs)".format(f))
 
     def __init__(self, iface, ciface):
         """
@@ -253,23 +297,23 @@ class Remote(object):
         self._dbus_iface  = iface
         self._dbus_ciface = ciface
         
-        self.exit       = lambda **kargs: self._bridge('exit',       **kargs)
-        self.getInfo    = lambda **kargs: self._bridge('getInfo',    **kargs)
-        self.getPid     = lambda **kargs: self._bridge('getPid',     **kargs)
-        self.getVersion = lambda **kargs: self._bridge('getVersion', **kargs)
+        self.exit       = lambda **kwargs: self._bridge('exit',       **kwargs)
+        self.getInfo    = lambda **kwargs: self._bridge('getInfo',    **kwargs)
+        self.getPid     = lambda **kwargs: self._bridge('getPid',     **kwargs)
+        self.getVersion = lambda **kwargs: self._bridge('getVersion', **kwargs)
         
         # TODO: Why does this not work...
         # for f in ['getVersion', 'getPid', 'getInfo', 'exit']:
-        #    self.__setattr__(f, lambda **kargs: self._bridge(f, **kargs))
+        #    self.__setattr__(f, lambda **kwargs: self._bridge(f, **kwargs))
         
     def __getattr__(self, n):
         """
         Handles the bridging to the supported interface
         """
         
-        # print "%s%s%s" % (self._iface.requested_bus_name, 
+        # print("{:s}{:s}{:s}".format(self._iface.requested_bus_name, 
         #                  self._iface.object_path,
-        #                  self._iface.bus_name)
+        #                  self._iface.bus_name))
 
         return getattr(self._dbus_iface, n) 
 
@@ -293,10 +337,10 @@ class Base(object):
         self._dbus_path    = path
         self._dbus_service = service
 
-        print 'Using DBUS', self._dbus_service
+        print('Using DBUS "{:s}" in class "{:s}"'.format(self._dbus_service, self.__class__.__name__))
 
     def _showMessage(self, msg, tmo = 0):
-        print msg
+        print(msg)
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # The DBus client class
@@ -305,11 +349,12 @@ class Client(Base):
     The base class for a DBus client
     """
     
-    def __init__(self, service):
+    def __init__(self, loop = None):
         """
         Constructor
         """
 
+        service = self._dbus_service
         Base.__init__(self, service)
 
         if getattr(self, '_debug', False):
@@ -328,7 +373,7 @@ class Client(Base):
         function 
         """
 
-        #print "adding signal receiver %s %s %s" % (signal, iface, func)
+        #print("adding signal receiver {:s} {:s} {:s}".format(signal, iface, func))
         self._dbus.add_signal_receiver(func,
                                        # interface_keyword='dbus_interface', 
                                        dbus_interface = iface, 
@@ -399,11 +444,11 @@ class Client(Base):
             xiface = dbus.Interface(obj, self._dbus_service + ".iface")
             
         except Exception, e:
-            print str(e)
+            print(str(e))
             sys.exit(1)
         
         #for a in ['dbus_interface', 'requested_bus_name']:
-        #    print getattr(xiface, a)
+        #    print(getattr(xiface, a))
 
         self._dbus_peer   = obj
         self._dbus_iface  = xiface
@@ -422,15 +467,15 @@ class Client(Base):
         
         self._dbus_disconnect()
         self.setServiceState()
-        self.showMessage("Service terminated: " % (str), 2500)
+        self.showMessage("Service terminated: {:s}".format(str), 2500)
 
     def CommonErrorHandler(self, e):
         """
         Common error handled that is tied to DBus
         """
 
-        print "Server raised an exception: %s" % (str(e))
-        print self._dbus, self._dbus_path, self._dbus_service
+        print("Server raised an exception: {:s}".format(str(e)))
+        print(self._dbus, self._dbus_path, self._dbus_service)
 
     def NoReply(self):
         """
@@ -471,7 +516,7 @@ class Service(dbus.service.Object, Base):
         A Client request to terminate the service
         """
 
-        print "Daemon exiting"
+        print("Daemon exiting")
         self._dbus_service_terminated('User command')
         self._dbus.close()
         # self._loop.quit()

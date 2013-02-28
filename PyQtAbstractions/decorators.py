@@ -59,32 +59,32 @@ def ui_class(cls):
 
     __decorators__._add_signals(cls)
 
-    # print cls.__name__, _ui_methods, _dbus_methods, _signal_methods
+    # print(cls.__name__, _ui_methods, _dbus_methods, _signal_methods)
     def make_unique_names(cls, methods, pref):
         n = 0
         new_list = []
         for f in methods:
-            name = "_%s_%s_action_%d" % (cls.__name__, pref, n)
+            name = "_{:s}_{:s}_action_{:d}".format(cls.__name__, pref, n)
             n += 1
         
-            #print cls.__name__, f.__name__, name, f
-            # print cls.__name__, f.__name__, name, f._on_ui_operation
+            #print(cls.__name__, f.__name__, name, f)
+            # print(cls.__name__, f.__name__, name, f._on_ui_operation)
         
             if not hasattr(cls, f.__name__):
-                # print 'skips', f.__name__, name
+                # print('skips', f.__name__, name)
                 continue 
 
             #if f.__code__ == getattr(cls, f.__name__).__code__:
-                # print 'skips', f.__name__, name
+                # print('skips', f.__name__, name)
             #    def skip():
-            #        print 'This should never happen'
+            #        print('This should never happen')
             #        pass
             #    setattr(cls, '_', skip)
             #    pass # continue
 
             f.__name__ = name
             setattr(cls, f.__name__, f)
-            # print getattr(cls, f.__name__)
+            # print(getattr(cls, f.__name__))
             new_list += [f]
 
         return new_list
@@ -94,7 +94,7 @@ def ui_class(cls):
     _ui_methods     = make_unique_names(cls, _ui_methods,     'ui')
 
     if hasattr(cls, '_'):
-        # print 'deletes _'
+        # print('deletes _')
         try:
             del cls._
         except:
@@ -129,19 +129,19 @@ def _on_signal_action_helper(f, obj):
     f._on_signal_operation =  l
 
 def _signal_add_decorator(name, type):
-    name = 'on_signal_%s' % (name)
+    name = 'on_signal_{:s}'.format(name)
 
-    # print '_signal_add_decorator', name
+    # print('_signal_add_decorator', name)
     def method(sig, *args, **kargs):
         def signal_action_helper(f):
-            # print '_signal_add_decorator', name, sig, args, kargs
+            # print('_signal_add_decorator', name, sig, args, kargs)
             _on_signal_action_helper(f, (sig, type))
             f._on_signal_args = (args, kargs)
             # f.__pyqtSignature__ = PyQtAbstractions.QtCore.pyqtSignature('char*')
             # return PyQtAbstractions.QtCore.Slot(*args, **kargs)(f)
             #return f 
         return signal_action_helper
-    method.__doc__  = "This method %s decorates signal handler for %s" % (name, type)
+    method.__doc__  = "This method {:s} decorates signal handler for {:s}".format(name, type)
     method.__name__ = name
     
     setattr(sys.modules[__name__], method.__name__, method)
@@ -158,7 +158,7 @@ def _ui_on_action_helper(f, obj):
     Interal help method that adds the decoration for the method
     """
 
-    # print f, obj
+    # print(f, obj)
     if hasattr(f, '_on_ui_operation'):
         l = getattr(f, '_on_ui_operation')
     else:
@@ -171,7 +171,7 @@ def _ui_on_action_helper(f, obj):
     f._on_ui_operation = l
 
 def _ui_add_decorator(name, type):
-    name = 'on_ui_%s' % (name)
+    name = 'on_ui_{:s}'.format(name)
     def method(*args):
         def ui_action_helper(f):
             for sig in args:
@@ -179,7 +179,7 @@ def _ui_add_decorator(name, type):
                 
             return f
         return ui_action_helper
-    method.__doc__  = "This method %s decorates signal handler for %s" % (name, type)
+    method.__doc__  = "This method {:s} decorates signal handler for {:s}".format(name, type)
     method.__name__ = name
     
     setattr(sys.modules[__name__], method.__name__, method)
@@ -215,9 +215,9 @@ def _dbus_on_action_helper(name, f, obj):
         (t, op, f) = f
         obj = (t, op, obj)
 
-        attr = '_on_%s_pre_operation' % (name)
+        attr = '_on_{:s}_pre_operation'.format(name)
     else:
-        attr = '_on_%s_operation' % (name)
+        attr = '_on_{:s}_operation'.format(name)
 
     if hasattr(f, attr):
         l = getattr(f, attr)
@@ -230,7 +230,7 @@ def _dbus_on_action_helper(name, f, obj):
     setattr(f, attr, l)
 
 def _dbus_add_decorator(name, type):
-    name = 'on_dbus_%s' % (name)
+    name = 'on_dbus_{:s}'.format(name)
     def method(*args):
         def dbus_action_helper(f):
             for sig in args:
@@ -238,23 +238,23 @@ def _dbus_add_decorator(name, type):
                 
             return f
         return dbus_action_helper
-    method.__doc__  = "This method %s decorates signal handler for %s" % (name, type)
+    method.__doc__  = "This method {:s} decorates signal handler for {:s}".format(name, type)
     method.__name__ = name
     
     setattr(sys.modules[__name__], method.__name__, method)
 
 def _dbus_add_pre_decorator(name, ff):
-    # print '_dbus_add_pre_decorator', name, ff
-    name = 'on_dbus_%s' % (name)
+    # print('_dbus_add_pre_decorator', name, ff)
+    name = 'on_dbus_{:s}'.format(name)
     def method(*args, **kargs):
-        # print '_dbus_add_pre_decorator:method', args, kargs
+        # print('_dbus_add_pre_decorator:method', args, kargs)
         def dbus_action_helper(f):
-            # print '_dbus_add_pre_decorator:method:dbus_action_helper', f
+            # print('_dbus_add_pre_decorator:method:dbus_action_helper', f)
             _dbus_on_action_helper('dbus', ('pre', _dbus_add_pre_action, f), (ff, args, kargs))
 
             return f
         return dbus_action_helper
-    method.__doc__  = "This method %s decorates signal handler for %s" % (name, type)
+    method.__doc__  = "This method {:s} decorates signal handler for {:s}".format(name, type)
     method.__name__ = name
     
     setattr(sys.modules[__name__], method.__name__, method)
@@ -313,8 +313,8 @@ def locker(*lock):
 
             # Acquire the locks
             for l in lock:
-                # print "Acquire lock: %s %s" % (func, l)
-                eval('self._%s.acquire()' % (l))
+                # print("Acquire lock: {:s} {:s}".format(func, l))
+                eval('self._{:s}.acquire()'.format(l))
 
             # calls the function
             try:
@@ -322,8 +322,8 @@ def locker(*lock):
             finally:
                 # allways make sure that all locks are released
                 for l in lock:
-                    # print "Release lock: %s %s" % (func, l)
-                    eval('self._%s.release()' % (l))
+                    # print("Release lock: {:s} {:s}".format(func, l))
+                    eval('self._{:s}.release()'.format(l))
 
             return res
         return caller

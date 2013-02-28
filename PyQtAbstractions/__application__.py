@@ -50,29 +50,6 @@ class _Object(QtCore.QObject, Base):
         scene.addPixmap(image)
         view.Logo.setScene(scene)
 
-    def getWord(self, data, start, size, divisor = None, mask = None):
-        """
-        Returns the data bytes from a vector
-        """
-        
-        res = 0
-        if size == 2:
-            r = range(size)
-        else:
-            r = range(size - 1, -1, -1)
-             
-        for i in r:
-            res <<= 8
-            res += data[start + i]
-
-        if mask:
-            res &= mask
-
-        if divisor:
-            res /= divisor
-
-        return res
-
     def setBits(self, pre, mask, bits = None):
         """
         Updates UI check boxes accoring to a bit vector
@@ -82,9 +59,9 @@ class _Object(QtCore.QObject, Base):
             bits = [128, 64, 32, 16, 8, 4, 2, 1]
 
         for a in bits:
-            if not hasattr(self._ui, pre + "_%d" % a):
+            if not hasattr(self._ui, pre + "_{:d}".format(a)):
                 continue
-            o = getattr(self._ui, pre + "_%d" % a)
+            o = getattr(self._ui, pre + "_{:d}".format(a))
             if (mask & a) != 0:
                 o.setCheckState(QtCore.Qt.CheckState.Checked)
             else:
@@ -215,7 +192,7 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
         Handles the about request from the UI
         """
 
-        txt = '<b>%s</b> v %s<p>Copyright &copy; 2011-2012 %s<br>' % (
+        txt = '<b>{:s}</b> v {:s}<p>Copyright &copy; 2011-2012 {:s}<br>'.format(
             QtGui.QApplication.applicationName(),
             QtGui.QApplication.applicationVersion(),
             QtGui.QApplication.organizationName())
@@ -232,13 +209,13 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
         name = 'Qt toolkit'
         ver  = QtCore.qVersion()
         url  = 'http://qt.nokia.com/'
-        txt += 'This program uses %s v %s<br>' % (name, ver)
-        txt += '<a href="%s">%s</a><p>' % (url, url)
+        txt += 'This program uses {:s} v {:s}<br>'.format(name, ver)
+        txt += '<a href="{:s}">{:s}</a><p>'.format(url, url)
 
         if Qt.isPySide: url  = 'http://www.pyside.org/'
         if Qt.isPyQt4:  url  = 'http://www.riverbankcomputing.co.uk/software/pyqt/'
-        txt += 'This program uses %s v %s<br>' % (PyQt.__name__, PyQt.__version__)
-        txt += '<a href="%s">%s</a><p>' % (url, url)
+        txt += 'This program uses {:s} v {:s}<br>'.format(PyQt.__name__, PyQt.__version__)
+        txt += '<a href="{:s}">{:s}</a><p>'.format(url, url)
             
         QtGui.QMessageBox.about(self, " " + self.windowTitle() + " ", txt)
 

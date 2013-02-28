@@ -67,25 +67,25 @@ class USB(Base):
         """
 
         try:
-            print "Found device 0x%04x:0x%04x at %s:%s" % (self._dev.idVendor, 
-                                                           self._dev.idProduct, 
-                                                           self._dev.bus, 
-                                                           self._dev.address)
+            print("Found device 0x{:04x}:0x{:04x} at {:s}:{:s}".format(self._dev.idVendor, 
+                                                                       self._dev.idProduct, 
+                                                                       self._dev.bus, 
+                                                                       self._dev.address))
         except:
-            print "Found device 0x%04x:0x%04x" % (self._dev.idVendor, 
-                                                  self._dev.idProduct)
+            print("Found device 0x{:04x}:0x{:04x}".format(self._dev.idVendor, 
+                                                          self._dev.idProduct))
             
         # Force it into a known state and reset it
         try:
             self._dev.set_configuration()
         except Exception, e:
-            print str(e)
+            print(str(e))
             # TODO: alert parent that we are dying
             # self._loop.quit()
             sys.exit()
             
         # self._dev.reset()
-        # print self._dev._ctx.backend
+        # print(self._dev._ctx.backend)
         
         # Get the current active configuration set
         self._cfg = self._dev.get_active_configuration()
@@ -114,23 +114,23 @@ class USB(Base):
 
             attr = ep.bmAttributes
             if usb.util.endpoint_type(attr) == usb.util.ENDPOINT_TYPE_CTRL:
-                print "Found CTRL Endpoint"
+                print("Found CTRL Endpoint")
             elif usb.util.endpoint_type(attr) == usb.util.ENDPOINT_TYPE_ISO:
-                print "Found ISO Endpoint"
+                print("Found ISO Endpoint")
             elif usb.util.endpoint_type(attr) == usb.util.ENDPOINT_TYPE_BULK:
                 if usb.util.endpoint_direction(ep.bEndpointAddress) == usb.util.ENDPOINT_OUT:
-                    print "Found BULK Endpoint out @ %s" % (ep.bEndpointAddress)
+                    print("Found BULK Endpoint out @ {:s}".format(ep.bEndpointAddress))
                     self._ep_out = ep
                 else:
-                    print "Found BULK Endpoint in @ %s" % (ep.bEndpointAddress)
+                    print("Found BULK Endpoint in @ {:s}".format(ep.bEndpointAddress))
                     self._ep_in  = ep
                 
             elif usb.util.endpoint_type(attr) == usb.util.ENDPOINT_TYPE_INTR:
-                print "Found INTR Endpoint"
+                print("Found INTR Endpoint")
             else:
                 pass
 
-        print self
+        print(self)
         
     def restart(self):
         """
@@ -186,17 +186,17 @@ class USB(Base):
         """
 
         desc = "USB device:\n"
-        desc += "\t%04x:%04x" % (self._dev.idVendor, 
-                                            self._dev.idProduct)
+        desc += "\t{:04x}:{:04x}".format(self._dev.idVendor, 
+                                     self._dev.idProduct)
         try:
-            desc += " at %s:%s\n" % (self._dev.bus, 
-                                     self._dev.address)
+            desc += " at {:s}:{:s}\n".format(self._dev.bus, 
+                                             self._dev.address)
         except:
             pass
 
-        desc += "\t%s %s\n" % (usb.util.get_string(self._dev, 1024, 1), 
-                               usb.util.get_string(self._dev, 1024, 2))
-        desc += "\tit has %d interfaces (with %d variants), which has %d endpoints" % (
+        desc += "\t{:s} {:s}\n".format(usb.util.get_string(self._dev, 1024, 1), 
+                                       usb.util.get_string(self._dev, 1024, 2))
+        desc += "\tit has {:d} interfaces (with {:d} variants), which has {:d} endpoints".format(
             self._cfg.bNumInterfaces, 
             len(self._ifaces),
             self._iface.bNumEndpoints)
@@ -238,11 +238,11 @@ class USB(Base):
         Print USB information
         """
 
-        print "%s:" % (unit)
+        print("{:s}:".format(unit))
         for (p, _) in fields:
             if hasattr(dev, p):
                 val = getattr(dev, p)
-                print "\t%s %d 0x%x" % (p, val, val)
+                print("\t{:s} {:d} 0x{:x}".format(p, val, val))
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Serial port
@@ -271,7 +271,7 @@ class Serial(Base):
         except Exception, e:
             raise SerialError(e)
 
-        # print self
+        # print(self)
         
     def write(self, data):
         """
@@ -306,10 +306,10 @@ class Serial(Base):
         """
 
         desc = "Serial port:\n"
-        desc += "\t%s" % (self._dev.name)
-        desc += "\t%s @ %s%s%s" % (self._dev.baudrate,
-                                   self._dev.bytesize, 
-                                   self._dev.parity,
-                                   self._dev.stopbits)
+        desc += "\t{:s}".format(self._dev.name)
+        desc += "\t{:s} @ {:s}{:s}{:s}"format(self._dev.baudrate,
+                                              self._dev.bytesize, 
+                                              self._dev.parity,
+                                              self._dev.stopbits)
         
         return desc

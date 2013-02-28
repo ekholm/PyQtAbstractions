@@ -102,7 +102,7 @@ class DBus:
         function 
         """
 
-        # print "adding signal receiver %s %s" % (signal, getattr(self, signal))
+        # print("adding signal receiver {:s} {:s}".format(signal, getattr(self, signal)))
         self._dbus.add_signal_receiver(func,
                                        # interface_keyword='dbus_interface', 
                                        dbus_interface = iface, 
@@ -173,11 +173,11 @@ class DBus:
             xiface = dbus.Interface(obj, self._dbus_service + ".iface")
             
         except Exception, e:
-            print str(e)
+            print(str(e))
             sys.exit(1)
         
         #for a in ['dbus_interface', 'requested_bus_name']:
-        #    print getattr(xiface, a)
+        #    print(getattr(xiface, a))
 
         self._dbus_peer   = obj
         self._dbus_iface  = xiface
@@ -197,7 +197,7 @@ class DBusWidget(QtGui.QWidget):
         self.data = None
 
     def on_refresh(self):
-        print 'refresh pressed', self.source
+        print('refresh pressed', self.source)
 
         if self.source == None:
             QtGui.QMessageBox.information(self,
@@ -207,7 +207,7 @@ class DBusWidget(QtGui.QWidget):
             return
 
     def setDataSource(self, source):
-        print 'DBusWidget::setDatSource called', source
+        print('DBusWidget::setDatSource called', source)
         self.source = source
 
         self.on_refresh()
@@ -225,7 +225,7 @@ class DataSource(QSource.QSource):
     def __init__(self, service):
         QSource.QSource.__init__(self)
 
-        print 'DataSource DBUS: ', service
+        print('DataSource DBUS: ', service)
         self.service = service.split(':')[-1]
 
         # Reqired by PyMca?
