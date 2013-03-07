@@ -16,6 +16,7 @@ try:
 except:
     _use_dbus = False
 
+
 try:
     from   PyQtAbstractions.decorators     import *
     import PyQtAbstractions.decorators     as decorators
@@ -34,8 +35,7 @@ except:
     from   __qt_modules__ import *
 
 # choose resource file 
-if Qt.isPySide: import PyQtAbstractions.pyside_resource
-if Qt.isPyQt4:  import PyQtAbstractions.pyqt4_resource
+from resources import *
 
 # choose application
 if Qt.isPyKDE4: 

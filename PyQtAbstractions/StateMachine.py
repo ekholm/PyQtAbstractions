@@ -35,7 +35,7 @@ class Handler(object):
             return lambda *args, **kwargs : None
 
 class Base(object):
-    _debug = True
+    _debug = False
 
     # <state> : (<action>, <action method>,    <new state>)
     # <state> : (<action>, <action method>,    <new state method>)
@@ -55,6 +55,10 @@ class Base(object):
 
     def _add_sm(self, sm):
         if type(sm) == dict:
+            for (k, v) in sm.items():
+                if k in self.sm_matrix:
+                    print("Duplicate state name: {:s}".format(k))
+                    sys.exit(1)
             self.sm_matrix = dict(self.sm_matrix.items() + sm.items())
         elif type(sm) == list:
             for s in sm:

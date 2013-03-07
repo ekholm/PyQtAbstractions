@@ -10,15 +10,18 @@ A modules that provides abstractions for the DBus protocol
 
 __all__ = []
 
+import sys
 import dbus
 import dbus.mainloop.glib
 import dbus.service
-import gobject
 import os
 import re
-import sys
 import threading
 import inspect
+if sys.version_info.major == 2:
+    import gobject
+elif sys.version_info.major == 3:
+    import gi.repository.GLib as gobject
 
 import PyQtAbstractions.__decorators__ as __decorators__
 
@@ -26,11 +29,36 @@ from PyQtAbstractions.decorators import on_dbus_signal_send
 from PyQtAbstractions.decorators import on_dbus_signal_receive
 from PyQtAbstractions.decorators import on_dbus_method
 
+import PyQtAbstractions.Params as Params 
+
 Exception = dbus.DBusException
 
 dbus_service = "se.ekholm"
 dbus_iface   = dbus_service  + ".iface" 
 
+# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+service_params = [
+    ('DBus service', 'dbus'),
+
+    Params.add('force', 
+               dest   = 'restart', 
+               action = 'store_true', 
+               help   = "Force restart of daemon if running"),
+    Params.add('no-daemon',
+               dest    = 'go_daemon',
+               action  = 'store_false',
+               default = 'store_true',
+               help   = "Don't start as a daemon"),
+    Params.add('exit', 
+              dest   = 'kill', 
+              action = 'store_true', 
+              help   = "Kill a runnig daemon")
+    ]
+
+client_params = [
+    ('DBus client', 'dbus')
+    ]
+    
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Process handling, go daemon
 def _doFork():
@@ -43,8 +71,8 @@ def _doFork():
         pid = os.fork() 
         if pid > 0:
             sys.exit(0) 
-    except OSError, e: 
-        print("fork failed: {:d} ({:s})".format(e.errno, e.strerror), file=sys.stderr)
+    except OSError as e: 
+        print("fork failed: {:d} ({:s})".format(e.errno, e.strerror)) #, file=sys.stderr)
         sys.exit(1)
 
 def _goDaemon():
@@ -58,35 +86,6 @@ def _goDaemon():
     os.umask(0) 
     _doFork()
 
-# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
-
-def add_service_arguments(parser):
-    """
-    Add DBus related arguments to the command line parser for a service
-    """
-
-    group = parser.add_argument_group('DBus related')
-    group.add_argument('-f', '--force', 
-                       dest   = '_dbus_restart', 
-                       action = 'store_true', 
-                       help   = "Force restart of daemon if running")
-    group.add_argument('-n', '--no-daemon',
-                       dest    = '_dbus_go_daemon',
-                       action  = 'store_false',
-                       default = 'store_true',
-                       help   = "Don't start as a daemon")
-    group.add_argument('-e', '--exit', 
-                       dest   = '_dbus_kill', 
-                       action = 'store_true', 
-                       help   = "Kill a runnig daemon")
-
-def add_client_arguments(parser):
-    """
-    Add DBus related arguments to the command line parser for a client
-    """
-
-    group = parser.add_argument_group('DBus related')
-    
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 def findServices(service):
     service = service.split('/')
@@ -237,7 +236,7 @@ def startService(handler, *args, **kwargs):
     if handler._dbus_kill:      sys.exit()
     if handler._dbus_go_daemon: _goDaemon()
 
-    print("{:s} daemon: {:s}".format(handler._dbus_service, os.getpid()))
+    print("{:s} daemon: {:d}".format(handler._dbus_service, os.getpid()))
 
     postProcessHandler(handler, *args, **kwargs)
 
@@ -433,7 +432,7 @@ class Client(Base):
         try:
             obj = self._dbus.get_object(self._dbus_service, self._dbus_path)
 
-        except Exception, e:
+        except Exception as e:
             return NoService(self)
 
         # ...then we retrieve the two interfaces, 
@@ -443,7 +442,7 @@ class Client(Base):
             ciface = dbus.Interface(obj, dbus_iface)
             xiface = dbus.Interface(obj, self._dbus_service + ".iface")
             
-        except Exception, e:
+        except Exception as e:
             print(str(e))
             sys.exit(1)
         

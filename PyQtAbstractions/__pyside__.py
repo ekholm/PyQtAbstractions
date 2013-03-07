@@ -33,7 +33,7 @@ class Handler(xml.sax.handler.ContentHandler):
             
     def characters(self, content):
         if self._inside:
-            name = '_%s' % self._current
+            name = '_{:s}'.format(self._current)
             if not hasattr(self, name):
                 setattr(self, name, "")
             attr = getattr(self, name)

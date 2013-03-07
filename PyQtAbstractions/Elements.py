@@ -176,7 +176,7 @@ class ElementWidget(QtGui.QWidget):
         element =  Elements[self.element][0]
         energy = PyMca.Elements.Element[element]['buildparameters']['energy']
         if energy is not None:
-            self.Energy.setText("%.3f" % energy)
+            self.Energy.setText("{:.3f}".format(energy))
         else:
             self.Energy.setText("")
         self.showElement(self.element + 1)
@@ -235,11 +235,11 @@ class ElementInfo(QtGui.QFrame):
 
     def populate(self, element):
         element -= 1
-        self.Number.setText("%s" % Elements[element][1])
-        self.Name.setText("%s" % (Elements[element][2]))
-        self.Atom.setText("%s" % (Elements[element][0]))
-        self.Mass.setText("%.0f" % (Elements[element][3]))
-        self.Density.setText("%.2f g/l" % (Elements[element][4]))
+        self.Number.setText("{:s}".format(Elements[element][1]))
+        self.Name.setText("{:s}".format(Elements[element][2]))
+        self.Atom.setText("{:s}".format(Elements[element][0]))
+        self.Mass.setText("{:.0f}".format(Elements[element][3]))
+        self.Density.setText("{:.2f} g/l".format(Elements[element][4]))
 
 @ui_class
 class ElementButton(QtGui.QPushButton):

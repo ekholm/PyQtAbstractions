@@ -91,7 +91,7 @@ def addPreActions(cls):
         addActions(cls._ui)
 
     for name in ['dbus', 'signal', 'ui']:
-        _addOperations(cls, '{:s}_pre'.formatname)    
+        _addOperations(cls, '{:s}_pre'.format(name))
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Signal/Slots

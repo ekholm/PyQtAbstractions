@@ -6,18 +6,18 @@ RES=pyqt4 pyside
 SRC=../PyQtAbstractions
 
 UI_FILES=$(wildcard forms/*.ui)
-RES_FILES=$(patsubst %,$(SRC)/%_resource.py,$(RES)) 
+RES_FILES=$(patsubst %,$(SRC)/%_resource2.py,$(RES)) $(patsubst %,$(SRC)/%_resource3.py,$(RES)) 
 
 all: $(RES_FILES) $(UI_FILES)
 
 resources: $(RES_FILES)
-$(SRC)/pyqt4_resource.py: resource.qrc $(UI_FILES)
+$(SRC)/pyqt4_resource%.py: resource.qrc $(UI_FILES)
 	@echo "Buildning resource file: \"$@\""
-	@(which pyrcc4 > /dev/null 2>&1 && pyrcc4 -o $@ $<) || echo "Skipped: $@"
+	@(which pyrcc4 > /dev/null 2>&1 && pyrcc4 -py$* -o $@ $<) || echo "Skipped: $@"
 
-$(SRC)/pyside_resource.py: resource.qrc $(UI_FILES)
-	@echo "Buildning resource file: \"$@\""
-	@(which pyside-rcc > /dev/null 2>&1 && pyside-rcc -o $@ $<) || echo "Skipped: $@"
+$(SRC)/pyside_resource%.py: resource.qrc $(UI_FILES)
+	@echo "Buildning resource file: \"$@\""	
+	@(which pyside-rcc > /dev/null 2>&1 && pyside-rcc -py$* -o $@ $<) || echo "Skipped: $@"
 
 .PHONY: resource.qrc
 resource.qrc: cleanRes
@@ -40,8 +40,6 @@ clean:
 	@find .. -name '*.pyc'        -exec rm '{}' \;
 	@find .. -name '*~'           -exec rm '{}' \;
 	@find .. -name '*_resource.*' -exec rm '{}' \;
-
-
 
 install: all
 	@(cd ..; python setup.py install)

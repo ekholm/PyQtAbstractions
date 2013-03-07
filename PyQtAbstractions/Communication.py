@@ -78,7 +78,7 @@ class USB(Base):
         # Force it into a known state and reset it
         try:
             self._dev.set_configuration()
-        except Exception, e:
+        except Exception as e:
             print(str(e))
             # TODO: alert parent that we are dying
             # self._loop.quit()
@@ -119,10 +119,10 @@ class USB(Base):
                 print("Found ISO Endpoint")
             elif usb.util.endpoint_type(attr) == usb.util.ENDPOINT_TYPE_BULK:
                 if usb.util.endpoint_direction(ep.bEndpointAddress) == usb.util.ENDPOINT_OUT:
-                    print("Found BULK Endpoint out @ {:s}".format(ep.bEndpointAddress))
+                    print("Found BULK Endpoint out @ {:d}".format(ep.bEndpointAddress))
                     self._ep_out = ep
                 else:
-                    print("Found BULK Endpoint in @ {:s}".format(ep.bEndpointAddress))
+                    print("Found BULK Endpoint in @ {:d}".format(ep.bEndpointAddress))
                     self._ep_in  = ep
                 
             elif usb.util.endpoint_type(attr) == usb.util.ENDPOINT_TYPE_INTR:
@@ -187,7 +187,7 @@ class USB(Base):
 
         desc = "USB device:\n"
         desc += "\t{:04x}:{:04x}".format(self._dev.idVendor, 
-                                     self._dev.idProduct)
+                                         self._dev.idProduct)
         try:
             desc += " at {:s}:{:s}\n".format(self._dev.bus, 
                                              self._dev.address)
@@ -268,7 +268,7 @@ class Serial(Base):
                                       serial.PARITY_NONE, 
                                       serial.STOPBITS_ONE,
                                       timeout = 0.5)
-        except Exception, e:
+        except Exception as e:
             raise SerialError(e)
 
         # print(self)
@@ -307,9 +307,9 @@ class Serial(Base):
 
         desc = "Serial port:\n"
         desc += "\t{:s}".format(self._dev.name)
-        desc += "\t{:s} @ {:s}{:s}{:s}"format(self._dev.baudrate,
-                                              self._dev.bytesize, 
-                                              self._dev.parity,
-                                              self._dev.stopbits)
+        desc += "\t{:d} @ {:d}{:s}{:d}".format(self._dev.baudrate,
+                                               self._dev.bytesize, 
+                                               self._dev.parity,
+                                               self._dev.stopbits)
         
         return desc

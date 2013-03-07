@@ -31,7 +31,7 @@ def _load_ui(form):
         else:
             print("don't know what to do...")
             sys.exit(1)
-    except Exception, e:
+    except Exception as e:
         print('Failed to load form: "{:s}"'.format(form))
         print('Parser returned: {}'.format(e))
         sys.exit(1)

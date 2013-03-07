@@ -162,7 +162,7 @@ class DBus:
         try:
             obj = self._dbus.get_object(self._dbus_service, "/")
 
-        except Exception, e:
+        except Exception as e:
             return NoService(self)
 
         # ...then we retrieve the two interfaces, 
@@ -172,7 +172,7 @@ class DBus:
             ciface = dbus.Interface(obj, IFACE)
             xiface = dbus.Interface(obj, self._dbus_service + ".iface")
             
-        except Exception, e:
+        except Exception as e:
             print(str(e))
             sys.exit(1)
         
