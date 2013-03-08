@@ -191,6 +191,7 @@ def postProcessHandler(handlers, *args, **kwargs):
 
 def enforceSolitude(handler):
     class MyClient(Client):
+        _dbus_service = handler._dbus_service
         def showMessage(self, msg, tmo):
             print(msg)
 
@@ -209,7 +210,7 @@ def enforceSolitude(handler):
             pass
 
         else:
-            print("{:s} daemon already started with pid {:s}".format(handler._dbus_service,
+            print("{:s} daemon already started with pid {:d}".format(handler._dbus_service,
                                                                      peer._dbus_peer.getPid()))
             sys.exit(1)
 
