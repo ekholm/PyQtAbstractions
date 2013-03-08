@@ -14,6 +14,8 @@ import sys
 
 import serial
 
+import socket
+
 import usb.control
 import usb.core
 import usb.util
@@ -35,6 +37,31 @@ class Base():
         """
 
         pass
+
+# ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
+# UDP/IP related
+class UDP(Base):
+    def __init__(self, ip, port):
+        """
+        """
+
+        Base.__init__(self)
+
+        self.ip   = ip
+        self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+
+        self.sock.bind(("127.0.0.1", self.port))
+
+    def write(self, data):
+        """
+        """
+
+        self.sock.sendto(data, (self.ip, self.port))
+
+    def read(self, len = 65536, timeout = 0):
+        (data, addr) = sock.recvfrom(len) # buffer size is 1024 bytes
+        return data
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # USB related
