@@ -38,6 +38,15 @@ class Base():
 
         pass
 
+    def write(*args):
+        print("required function 'write' not implemented")
+
+    def read(*args):
+        print("required function 'write' not implemented")
+
+    def reset(*args):
+        print("required function 'write' not implemented")
+
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # UDP/IP related
 class UDP(Base):
@@ -51,17 +60,22 @@ class UDP(Base):
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 
-        self.sock.bind(("127.0.0.1", self.port))
+        #self.sock.bind(("localhost", self.port))
 
     def write(self, data):
         """
         """
 
-        self.sock.sendto(data, (self.ip, self.port))
+        data =''.join([chr(item) for item in data])
+        self.sock.sendto(data, (self.ip, self.port))        
 
     def read(self, len = 65536, timeout = 0):
-        (data, addr) = sock.recvfrom(len) # buffer size is 1024 bytes
+        (data, _) = self.sock.recvfrom(len)
+
         return data
+
+    def reset(self):
+        pass
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # USB related
@@ -183,6 +197,9 @@ class USB(Base):
         read = self._ep_in.read(len, timeout = timeout)
         return read
 
+    def reset(self):
+        self._dev.reset()
+        
     def write_ctrl(self, cmd, value, index, data = None):
         """
         Write data over the device control channel
@@ -313,6 +330,9 @@ class Serial(Base):
         """
 
         return self._dev.read(len)
+
+    def reset(self):
+        pass
 
     def readline(self, eol = '\n'):
         """
