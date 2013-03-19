@@ -26,7 +26,8 @@ class Parser:
             pass
 
         # create the normal parser
-        parser = argparse.ArgumentParser(**kwargs)
+        parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter, **kwargs)
+                                           
 
         pre = ''     # the prefix for the variable
         gp  = parser # default parser is top lever parser

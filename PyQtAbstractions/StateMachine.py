@@ -125,12 +125,12 @@ class Base(object):
                             print("""SM: action "{:s}" in state "{:s}" """.format(f.__name__, self.current))
                         doneAction = True
                         if args != ():
-                            if f.im_self:
+                            if hasattr(f, 'im_self') and f.im_self:
                                 f(args)
                             else:
                                 f(self, args)
                         else:
-                            if f.im_self:
+                            if hasattr(f, 'im_self') and f.im_self:
                                 f()
                             else:
                                 f(self)
@@ -150,6 +150,7 @@ class Base(object):
         # if not there is some error... or it completely normal
         if not doneAction and event != None:
             print("""Untreated event "{:s}" in state "{:s}" """.format(event, self.current))
+            self._handler.set(None)
 
     def getState(self):
         return self.current
@@ -164,6 +165,7 @@ class Base(object):
 
         if state not in self.sm_matrix:
             print("""Invalid state: "{:s}" """.format(state))
+            self._handler.set(None)
             return
 
         self.current = state
