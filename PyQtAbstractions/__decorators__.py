@@ -284,6 +284,6 @@ def _dbus_add_action_helper(self, name, elem, action, func):
 
     if hasattr(self, '_dbus_service'):
         # print(name, elem, action, func)
-        dbus_iface = self._dbus_service + ".iface"
+        dbus_iface = self._dbus_service #  + ".iface"
         if not isActionAdded(self, 'dbus', elem, dbus_iface + "." + action, func.__name__):
             self._dbus_add_signal_receiver(elem, dbus_iface, func)

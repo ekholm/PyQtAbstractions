@@ -4,8 +4,9 @@
 # Licence is LGPL 2, with following restriction
 # * Modications to this file must be reported to above email
 
-import traceback
 import inspect
+import sys
+import traceback
 
 class Handler(object):
     def __init__(self, owner):
@@ -35,7 +36,7 @@ class Handler(object):
             return lambda *args, **kwargs : None
 
 class Base(object):
-    _debug = False
+    _debug = True
 
     # <state> : (<action>, <action method>,    <new state>)
     # <state> : (<action>, <action method>,    <new state method>)
@@ -49,22 +50,85 @@ class Base(object):
         self.in_action      = False
         self.pending_action = None
 
+    def init(self):
+        pass
+
     def _configure_sm(self):
         self.sm_matrix = {}
+        # print self.__class__.__name__
         self._add_sm(self.matrix)
+        # self._print()
 
-    def _add_sm(self, sm):
+    def _print(self):
+        for (k, v) in sorted(self.sm_matrix.items()):
+            if type(v) == list:
+                print('"{}":'.format(k))
+                for a in v:
+                    print('    {}'.format(a))
+            else:
+                print('"{}": {}'.format(k, v))
+
+    def _update_tuple(self, item, translate):
+        if len(item) == 0:
+            return item
+
+        (a, f, e) = item
+
+        if type(e) != str:
+            return item
+
+        if e not in translate:
+            return item
+
+        return (a, f, translate[e])
+
+    def _update_tuples(self, data, translate):
+        if type(data) == list:
+            new_data = []
+            for d in data:
+                new_data += [self._update_tuple(d, translate)]
+            return new_data
+        else:
+            return self._update_tuple(data, translate)
+                
+    def _add_sm(self, sm, rename = {}, translate = {}):
         if type(sm) == dict:
+            # do update of key names
+            tmp = {}
             for (k, v) in sm.items():
+                # if a state name is translated, we remove its actions
+                if k in translate:
+                    continue
+
+                # check if a "new state name" need to be updated
+                v = self._update_tuples(v, translate)
+
+                # check if state name need to be updated
+                if k in rename:
+                    k = rename[k]
+                    
+                    # None means, remove action
+                    if k == None:
+                        continue
+
+                # check for duplicates
                 if k in self.sm_matrix:
                     print("Duplicate state name: {:s}".format(k))
                     sys.exit(1)
-            self.sm_matrix = dict(self.sm_matrix.items() + sm.items())
+                    
+                tmp[k] = v
+
+            self.sm_matrix = dict(self.sm_matrix.items() + tmp.items())
+
         elif type(sm) == list:
             for s in sm:
                 self._add_sm(s)
+
+        elif type(sm) == tuple:
+            self._add_sm(*sm)
+
         else:
-            print("No matrix defined!")
+            print("Illegal matrix defined! {}".format(type(sm)))
             traceback.print_stack()
             sys.exit(1)
  
@@ -138,7 +202,10 @@ class Base(object):
                 # now we check if we need to change state, 
                 # if new state is a method, call it to get new state
                 if callable(n):
-                    n = n()
+                    if hasattr(f, 'im_self') and f.im_self:
+                        n = n()
+                    else:
+                        n = n(self)
 
                 # if new state is not None, we are done with current action
                 # and change state

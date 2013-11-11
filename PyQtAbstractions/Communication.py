@@ -49,15 +49,16 @@ class Base():
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # UDP/IP related
-class UDP(Base):
+class IP(Base):
     def __init__(self, ip, port):
-        """
-        """
-
         Base.__init__(self)
-
+        
         self.ip   = ip
         self.port = port
+        
+class UDP(IP):
+    def __init__(self, ip, port):
+        IP.__init__(self, ip, port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
 
         #self.sock.bind(("localhost", self.port))
@@ -77,6 +78,38 @@ class UDP(Base):
     def reset(self):
         pass
 
+class TCP(Base):
+    def __init__(self, ip, port):
+        IP.__init__(self, ip, port)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        self.sock.connect((ip, port))
+
+    def write(self, data):
+        data =''.join([chr(item) for item in data])
+
+        totsent = 0
+        size = len(data)
+        while totsent < size:
+            sent = self.sock.send(data[totsent:])
+
+            if sent == 0:
+                raise RuntimeError("socket connection broken")
+            totsent += sent
+
+    def read(self, size = 65536, timeout = 0):
+        data = []
+        while len(data) < size:
+            tmp = self.sock.recv(size - len(data))
+
+            if tmp == '':
+                raise RuntimeError("socket connection broken")
+            data += tmp
+
+        return data
+
+    def reset(self):
+        pass
+
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # USB related
 USBCoreError = usb.core.USBError 
@@ -85,7 +118,7 @@ class USBError(CommunicationError):
     pass
 
 class USB(Base):
-    def __init__(self, vid, pid, alt_iface = 0):
+    def __init__(self, vid, pid, alt_iface = 0, raw = False):
         """
         Constructor that retrives the selected USB device
         """
@@ -99,9 +132,9 @@ class USB(Base):
             raise USBError("No device found")
 
         self._alt_iface = alt_iface
-        self._startUSB()
+        self._startUSB(raw)
 
-    def _startUSB(self):
+    def _startUSB(self, raw = False):
         """
         Internal method that starts the USB device communication and 
         initializes the interfaces and end-points
@@ -118,7 +151,8 @@ class USB(Base):
             
         # Force it into a known state and reset it
         try:
-            self._dev.set_configuration()
+            if not raw:
+                self._dev.set_configuration()
         except Exception as e:
             print(str(e))
             # TODO: alert parent that we are dying
@@ -138,7 +172,8 @@ class USB(Base):
 
         # Get its interface 
         self._iface = self._ifaces[self._alt_iface] # self._cfg[(0, 0)]
-        self._dev.set_interface_altsetting(interface = 0, alternate_setting = self._alt_iface)
+        if not raw:
+            self._dev.set_interface_altsetting(interface = 0, alternate_setting = self._alt_iface)
 
         #self.printDevice()
         #self.printConfig()
@@ -211,8 +246,8 @@ class USB(Base):
 
         self._dev.ctrl_transfer(reqType, cmd, wValue = value, wIndex = index, data_or_wLength = data)
         # ctrl_transfer(self, bmRequestType, bRequest, wValue=0, wIndex=0, data_or_wLength = None, timeout = None)
-
-    def read_ctrl(self, cmd, value, index):
+        
+    def _read_ctrl(self, cmd, value, index):
         """
         Read data from the device control channel
         """
@@ -221,6 +256,17 @@ class USB(Base):
                                               usb.util.CTRL_TYPE_VENDOR, 
                                               usb.util.CTRL_RECIPIENT_DEVICE)
         return self._dev.ctrl_transfer(reqType, cmd, wValue = value, wIndex = index)
+
+    def read_ctrl(self, cmd, value, index, length):
+        """
+        Read data from the device control channel
+        """
+
+        reqType = usb.util.build_request_type(usb.util.CTRL_IN, 
+                                              usb.util.CTRL_TYPE_VENDOR, 
+                                              usb.util.CTRL_RECIPIENT_DEVICE)
+        return self._dev.ctrl_transfer(reqType, cmd, wValue = value, wIndex = index, 
+                                       data_or_wLength = length)
 
     # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
     # printing 
@@ -321,7 +367,14 @@ class Serial(Base):
         """
         Write data to serial port
         """
-
+        
+        if type(data) == list:
+            tmp = ''
+            for d in data:
+                tmp += '{:d}'.format(d)
+            # print len(data), len(tmp), data
+            data = tmp
+        
         return self._dev.write(data)
 
     def read(self, len = 1):
@@ -360,3 +413,14 @@ class Serial(Base):
                                                self._dev.stopbits)
         
         return desc
+
+class RawSerial(Serial):
+    def write(self, data):
+        """
+        Write data to serial port
+        """
+        
+        if type(data) == list:
+            data = bytearray(x for x in data)
+
+        return self._dev.write(data)

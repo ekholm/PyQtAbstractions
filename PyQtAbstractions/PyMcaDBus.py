@@ -20,7 +20,7 @@ import re
 
 SOURCE_TYPE = 'DBUS'
 dbus_obj   = "se.esrf.pymca"
-dbus_iface = dbus_obj + ".iface" 
+dbus_iface = dbus_obj # + ".iface" 
 
 def createButton(self):
     # setattr(self, 'openDBus', openDBus)
@@ -79,7 +79,7 @@ def getDBusDesc(service):
     service = service.split(':')[-1]
     bus   = dbus.SessionBus() 
     obj   = bus.get_object(service, "/")
-    iface = dbus.Interface(obj, service + ".iface")
+    iface = dbus.Interface(obj, service) # + ".iface")
     desc = iface.get_info()
 
     return desc
@@ -170,7 +170,7 @@ class DBus:
         # and then the interface we are interested in
         try:
             ciface = dbus.Interface(obj, IFACE)
-            xiface = dbus.Interface(obj, self._dbus_service + ".iface")
+            xiface = dbus.Interface(obj, self._dbus_service) #  + ".iface")
             
         except Exception as e:
             print(str(e))

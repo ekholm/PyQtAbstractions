@@ -206,6 +206,8 @@ except:
     def _dbus_signal_send(*args): pass
     def _dbus_method(*args): pass
 
+dbus_tag = "com.orexplore.replace"
+
 def _dbus_on_action_helper(name, f, obj):
     """
     Interal help method that adds the decoration for the method
@@ -289,7 +291,7 @@ def on_dbus_method(dbus_interface = None, in_signature=None, out_signature=None)
     if dbus_interface:
         return dbus.service.method(dbus_interface, in_signature, out_signature)
     else:
-        return dbus.service.method("com.orexplore.replace", in_signature, out_signature)
+        return dbus.service.method(dbus_tag, in_signature, out_signature)
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Thread decorators

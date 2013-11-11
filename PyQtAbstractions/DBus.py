@@ -28,13 +28,14 @@ import PyQtAbstractions.__decorators__ as __decorators__
 from PyQtAbstractions.decorators import on_dbus_signal_send
 from PyQtAbstractions.decorators import on_dbus_signal_receive
 from PyQtAbstractions.decorators import on_dbus_method
+from PyQtAbstractions.decorators import dbus_tag
 
 import PyQtAbstractions.Params as Params 
 
 Exception = dbus.DBusException
 
 dbus_service = "se.ekholm"
-dbus_iface   = dbus_service  + ".iface" 
+dbus_iface   = dbus_service #   + ".iface" 
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 service_params = [
@@ -120,7 +121,6 @@ def isServiceStarted(service):
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # DBUS
 def _updateMethodInterfaces(cls):
-    tag   = "com.orexplore.replace"
     iface = cls._dbus_iface
 
     for elem in dir(cls):
@@ -133,7 +133,7 @@ def _updateMethodInterfaces(cls):
         if not hasattr(func, '_dbus_interface'):
             continue
 
-        if getattr(func, '_dbus_interface') == tag:
+        if getattr(func, '_dbus_interface') == dbus_tag:
             setattr(func.__func__, '_dbus_interface', iface)
 
 
@@ -311,10 +311,11 @@ class Remote(object):
         Handles the bridging to the supported interface
         """
         
-        # print("{:s}{:s}{:s}".format(self._iface.requested_bus_name, 
-        #                  self._iface.object_path,
-        #                  self._iface.bus_name))
+        #print("{:s}{:s}{:s}".format(self._iface.requested_bus_name, 
+        #                            self._iface.object_path,
+        #                            self._iface.bus_name))
 
+        # print dir(self._dbus_iface)
         return getattr(self._dbus_iface, n) 
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
@@ -433,7 +434,10 @@ class Client(Base):
         try:
             obj = self._dbus.get_object(self._dbus_service, self._dbus_path)
 
+            # obj = self._dbus.get_object(self._dbus_service, '/' + (self._dbus_service + ".iface").replace('.', '/'))
+
         except Exception as e:
+            print('No service found for: "{:s}"'.format(self._dbus_service))
             return NoService(self)
 
         # ...then we retrieve the two interfaces, 
@@ -441,8 +445,8 @@ class Client(Base):
         # and then the interface we are interested in
         try:
             ciface = dbus.Interface(obj, dbus_iface)
-            xiface = dbus.Interface(obj, self._dbus_service + ".iface")
-            
+            xiface = dbus.Interface(obj, self._dbus_service) # + ".iface")
+
         except Exception as e:
             print(str(e))
             sys.exit(1)

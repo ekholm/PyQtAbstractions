@@ -7,21 +7,21 @@
 import sys
 
 # First, deduce what bindings are choosed
-__pyside__ = ('PySide' in sys.modules) and (sys.modules['PySide'] != None)
-__pyqt4__  = ('PyQt4'  in sys.modules) and (sys.modules['PyQt4']  != None)
-__pykde4__ = ('PyKDE4' in sys.modules) and (sys.modules['PyKDE4'] != None)
+__pyside4__ = ('PySide' in sys.modules) and (sys.modules['PySide'] != None)
+__pyqt4__   = ('PyQt4'  in sys.modules) and (sys.modules['PyQt4']  != None)
+__pykde4__  = ('PyKDE4' in sys.modules) and (sys.modules['PyKDE4'] != None)
 
 #print('PySide' in sys.modules)
 #print('PyQt4'  in sys.modules)
 #print('PyKDE4' in sys.modules)
 
 # We can't have both PySide and PyQt4 at the same time
-if (__pyside__ and __pyqt4__) or (__pyside__ and __pykde4__):
+if (__pyside4__ and __pyqt4__) or (__pyside4__ and __pykde4__):
     print('Both PySide and PyQt4 is loaded')
     sys.exit(1)
 
 # No bindings are loaded
-if not (__pyside__ or __pyqt4__ or __pykde4__):
+if not (__pyside4__ or __pyqt4__ or __pykde4__):
     print('No QT bindings are loaded')
     sys.exit(1)
     
@@ -29,7 +29,7 @@ if not (__pyside__ or __pyqt4__ or __pykde4__):
 __all__ = ['PyQt', 'Qt', 'QtCore', 'QtGui', 'QtSvg', 'QtOpenGL', 'QtUiTools']
 
 # Import the PySide modules
-if __pyside__:  
+if __pyside4__:  
     import PySide
     import PySide as PyQt
 
@@ -73,7 +73,7 @@ if __pyqt4__ or __pykde4__:
     QtCore.Qt.CheckState.PartiallyChecked = QtCore.Qt.PartiallyChecked
 
 # Set varuable in Qt for user to test on
-Qt.isPySide = __pyside__
+Qt.isPySide = __pyside4__
 Qt.isPyQt4  = __pyqt4__
 Qt.isPyKDE4 = __pykde4__
 

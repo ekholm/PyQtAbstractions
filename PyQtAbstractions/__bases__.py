@@ -87,6 +87,7 @@ class _Settings(QtCore.QSettings):
         if   isinstance(attr, QtGui.QCheckBox):
             return attr.checkState()
         elif isinstance(attr, QtGui.QComboBox):
+#             print attr, attr.currentText(), attr.objectName(), attr.currentIndex()
             return attr.currentIndex()
         elif isinstance(attr, QtGui.QDoubleSpinBox):
             return attr.value()
@@ -109,7 +110,9 @@ class _Settings(QtCore.QSettings):
         if   isinstance(attr, QtGui.QCheckBox):
             return attr.setCheckState(QtCore.Qt.CheckState(int(val)))
         elif isinstance(attr, QtGui.QComboBox):
+#            print attr, attr.currentText(), attr.objectName(), attr.currentIndex(), val
             attr.setCurrentIndex(int(val))
+#            print attr, attr.currentText(), attr.objectName(), attr.currentIndex(), val
         elif isinstance(attr, QtGui.QDoubleSpinBox):
             attr.setValue(float(val))
         elif isinstance(attr, QtGui.QLineEdit):
@@ -131,6 +134,7 @@ class _Settings(QtCore.QSettings):
         for e in items:
             attr = getattr(ui, "{:s}{:s}".format(pre, e))
             val = self._getVal(attr)
+            # print 'Saving', e, val, attr
             self.setValue(e, val)
         self.endGroup()
 
