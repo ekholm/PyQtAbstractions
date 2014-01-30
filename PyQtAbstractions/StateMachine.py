@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 # Licence is LGPL 2, with following restriction
@@ -23,6 +22,7 @@ class Handler(object):
         if self._sm:
             return False
 
+        # print sm
         self._sm = sm(self, self._owner)
         self._sm.init(*args, **kwargs)
         self._sm._configure_sm()
@@ -57,7 +57,8 @@ class Base(object):
         self.sm_matrix = {}
         # print self.__class__.__name__
         self._add_sm(self.matrix)
-        # self._print()
+        #self._print()
+        #sys.exit()
 
     def _print(self):
         for (k, v) in sorted(self.sm_matrix.items()):
@@ -118,7 +119,7 @@ class Base(object):
                     
                 tmp[k] = v
 
-            self.sm_matrix = dict(self.sm_matrix.items() + tmp.items())
+            self.sm_matrix = dict(list(self.sm_matrix.items()) + list(tmp.items()))
 
         elif type(sm) == list:
             for s in sm:
@@ -143,6 +144,8 @@ class Base(object):
         return True
         
     def action(self, event, *args):
+        # print('event', event)
+        # traceback.print_stack()
         if self.in_action:
             self.pending_action = (event, args)
             return
@@ -161,7 +164,7 @@ class Base(object):
             print("""SM: event "{:s}" in state "{:s}" """.format(event, self.current))
 
         # if action is None, then it's the default action
-        #if action not in self.sm_matrix and action != None:
+        # if action not in self.sm_matrix and action != None:
         #    print("Invalid action: {:s}".format(action))
         #    return
 
@@ -216,7 +219,11 @@ class Base(object):
         # Here we check that we really has done any action for the state
         # if not there is some error... or it completely normal
         if not doneAction and event != None:
-            print("""Untreated event "{:s}" in state "{:s}" """.format(event, self.current))
+            if hasattr(self, 'ignore') and (event in self.ignore):
+                # print("""SM: event "{:s}" in state "{:s} is ignored" """.format(event, self.current))
+                return
+
+            print("""SM: Untreated event "{:s}" in state "{:s}" """.format(event, self.current))
             self._handler.set(None)
 
     def getState(self):

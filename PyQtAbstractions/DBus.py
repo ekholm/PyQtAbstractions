@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 # Licence is LGPL 2, with following restriction
@@ -12,12 +11,15 @@ __all__ = []
 
 import sys
 import dbus
+import types
 import dbus.mainloop.glib
 import dbus.service
 import os
 import re
 import threading
 import inspect
+import traceback
+
 if sys.version_info.major == 2:
     import gobject
 elif sys.version_info.major == 3:
@@ -127,14 +129,18 @@ def _updateMethodInterfaces(cls):
         if not hasattr(cls, elem):
             continue 
         func = getattr(cls, elem)
-        if not inspect.ismethod(func):
+
+        if not inspect.ismethod(func) and not type(func) == types.FunctionType:
             continue
 
         if not hasattr(func, '_dbus_interface'):
             continue
 
         if getattr(func, '_dbus_interface') == dbus_tag:
-            setattr(func.__func__, '_dbus_interface', iface)
+            if sys.version_info.major == 3:
+                setattr(func, '_dbus_interface', iface)
+            else:
+                setattr(func.__func__, '_dbus_interface', iface)
 
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
@@ -176,7 +182,8 @@ def postProcessHandler(handlers, *args, **kwargs):
     loop = gobject.MainLoop()
     for h in handlers:
         h._loop = loop
-        obj     = h(h._loop, *args, **kwargs)
+        # obj     = h(h._loop, *args, **kwargs)
+        obj     = h(*args, **kwargs)
         if call_when_client_created:
             call_when_client_created(obj)
         clients += [obj]
@@ -325,12 +332,12 @@ class Base(object):
     Common base class for DBus client/servers
     """
 
-    def __init__(self, service):
+    def __init__(self):
         """
         Constructor
         """
 
-        service = service.split('/')
+        service = self._dbus_service.split('/')
         path    = '/' + '/'.join(service[1:])
         service = service[0]
 
@@ -355,8 +362,7 @@ class Client(Base):
         Constructor
         """
 
-        service = self._dbus_service
-        Base.__init__(self, service)
+        Base.__init__(self)
 
         if getattr(self, '_debug', False):
             self._dbus_peer = NoService(self)
@@ -496,20 +502,17 @@ class Service(dbus.service.Object, Base):
     The DBus base class for services
     """
     
-    def __init__(self, loop):
+    def __init__(self):
         """
         Constructor
         """
 
-        service = self._dbus_service
-
-        self._loop    = loop
         self._txLock  = threading.RLock()
         self._rxLock  = threading.RLock()
         self._cmdLock = threading.RLock()
 
         # dbus.server.Server(dbus.SessionBus(), _objs[service], self._dbus)
-        Base.__init__(self, service)
+        Base.__init__(self)
 
         dbus.service.Object.__init__(self, self._dbus, self._dbus_path)
         self._dbus_name = dbus.service.BusName(self._dbus_service, self._dbus)

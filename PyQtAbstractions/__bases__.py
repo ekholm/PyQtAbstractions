@@ -62,6 +62,7 @@ class _Settings(QtCore.QSettings):
             settingsFile = QtGui.QDesktopServices.storageLocation(location)
             settingsFile += "/.{:s}".format(orgDom)
             settingsFile += "/{:s}.conf".format(appName)
+            print(settingsFile)
             QtCore.QSettings.__init__(self, settingsFile, QtCore.QSettings.NativeFormat)
         else:
             #format = QtCore.QSettings.IniFormat

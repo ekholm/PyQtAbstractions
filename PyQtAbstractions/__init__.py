@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 # Licence is LGPL 2, with following restrictions

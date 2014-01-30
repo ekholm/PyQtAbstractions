@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 # Licence is LGPL 2, with following restriction
@@ -34,7 +33,6 @@ class Parser:
 
         # first, handle the global parametrs
         for pp in global_params:
-            
             # check if we have special entry in list
             if type(pp) == tuple:
                 # This entry is for sub parser heading (name and command line prefix)
@@ -70,7 +68,7 @@ class Parser:
                 continue
 
             # create the subparser for the client
-            grp = parser.add_argument_group(c.__name__)
+            grp = parser.add_argument_group(c._params_pre)
 
             # and add is argments
             for (n, p) in c._params:
@@ -79,7 +77,9 @@ class Parser:
                 if p['dest'][0] != '_':
                     p['dest'] = "_{:s}".format(p['dest'])
 
-                p['dest'] = '_{:s}{:s}'.format(c.__name__, p['dest'])
+                # name = c.__name__
+                name = c._params_pre.replace('-', '_')
+                p['dest'] = '_{:s}{:s}'.format(name, p['dest'])
 
                 # create the name for the 
                 if hasattr(c, '_params_pre'):
@@ -111,7 +111,7 @@ class Parser:
             if p['dest'][0] != '_':
                 p['dest'] = "_{:s}".format(p['dest'])
             elif pre != "":
-                print 'bas'
+                print('bas')
 
             if pre != '':
                 dest = '_{:s}{:s}'.format(pre, p['dest'])
@@ -133,5 +133,9 @@ class Parser:
                     p['dest'] = "_{:s}".format(p['dest'])
 
                 # store the value in the destination client
-                src = '_{:s}{:s}'.format(c.__name__, p['dest'])
+                # name = c.__name__
+                name = c._params_pre.replace('-', '_')
+                src = '_{:s}{:s}'.format(name, p['dest'])
                 setattr(c , p['dest'], getattr(Parser.C, src))
+
+        self.parser = parser

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 # Licence is LGPL 2, with following restrictions
@@ -52,12 +51,16 @@ def _addOperations(self, name):
         if not hasattr(self, elem):
             continue 
         func = getattr(self, elem)
-        if not inspect.ismethod(func):
+
+        if not inspect.ismethod(func) and not type(func) == types.FunctionType:
             continue
+
         # print('addOperations:', func.im_class, func.im_self, func.im_func)
         # Add method hooks for the UI 
+
         if not hasattr(func, op_name):
             continue
+
         # Iterate over all objects to listen to
         for action in getattr(func, op_name):
             if action[0] == 'pre':

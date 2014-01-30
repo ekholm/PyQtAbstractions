@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 # Licence is LGPL 2, with following restrictions
@@ -64,8 +63,11 @@ def ui_class(cls):
         n = 0
         new_list = []
         for f in methods:
-            name = "_{:s}_{:s}_action_{:d}".format(cls.__name__, pref, n)
-            n += 1
+            if hasattr(f, '_{:s}_name'.format(pref)):
+                name = getattr(f, '_{:s}_name'.format(pref))[0]
+            else:
+                name = "_{:s}_{:s}_action_{:d}".format(cls.__name__, pref, n)
+                n += 1
         
             #print(cls.__name__, f.__name__, name, f)
             # print(cls.__name__, f.__name__, name, f._on_ui_operation)
@@ -253,7 +255,7 @@ def _dbus_add_pre_decorator(name, ff):
         def dbus_action_helper(f):
             # print('_dbus_add_pre_decorator:method:dbus_action_helper', f)
             _dbus_on_action_helper('dbus', ('pre', _dbus_add_pre_action, f), (ff, args, kargs))
-
+            
             return f
         return dbus_action_helper
     method.__doc__  = "This method {:s} decorates signal handler for {:s}".format(name, type)
@@ -293,6 +295,26 @@ def on_dbus_method(dbus_interface = None, in_signature=None, out_signature=None)
     else:
         return dbus.service.method(dbus_tag, in_signature, out_signature)
 
+# we override some function if we are not using dbus
+if hasattr(sys, '_no_dbus') and sys._no_dbus:
+    def on_dbus_signal_receive(*args):
+        def wrapper(f):
+            f._dbus_name = args
+            for sig in args:
+                _dbus_on_action_helper('dbus', f, (sig, type))
+            return f
+        return wrapper
+
+    def on_dbus_signal_send(signature = None):
+        def wrapper(func):
+            def caller(self, *args, **kargs):
+                res = func(self, *args, **kargs)
+                if hasattr(self, 'client') and self.client and hasattr(self.client, func.__name__):
+                    getattr(self.client, func.__name__)(*args, **kargs)
+                return res
+            return caller
+        return wrapper
+
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Thread decorators
 
@@ -316,7 +338,8 @@ def locker(*lock):
             # Acquire the locks
             for l in lock:
                 # print("Acquire lock: {:s} {:s}".format(func, l))
-                eval('self._{:s}.acquire()'.format(l))
+                getattr(self, '_{}'.format(l)).acquire()
+                # eval('self._{:s}.acquire()'.format(l))
 
             # calls the function
             try:
@@ -325,8 +348,7 @@ def locker(*lock):
                 # allways make sure that all locks are released
                 for l in lock:
                     # print("Release lock: {:s} {:s}".format(func, l))
-                    eval('self._{:s}.release()'.format(l))
-
+                    getattr(self, '_{}'.format(l)).release()
             return res
         return caller
     return wrapper
