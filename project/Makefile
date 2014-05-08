@@ -1,7 +1,7 @@
 # Copyrighted 2011 - 2012 Mattias Ekholm <code@ekholm.se>
 
 NAME=PyQtAbstractions
-RES=pyqt4 pyside
+RES=pyqt4 pyqt5 pyside 
 
 SRC=../PyQtAbstractions
 
@@ -14,6 +14,13 @@ resources: $(RES_FILES)
 $(SRC)/pyqt4_resource%.py: resource.qrc $(UI_FILES)
 	@echo "Buildning resource file: \"$@\""
 	@(which pyrcc4 > /dev/null 2>&1 && pyrcc4 -py$* -o $@ $<) || echo "Skipped: $@"
+
+$(SRC)/pyqt5_resource2.py:
+	@true
+
+$(SRC)/pyqt5_resource3.py: resource.qrc $(UI_FILES)
+	@echo "Buildning resource file: \"$@\""
+	@(which pyrcc5 > /dev/null 2>&1 && pyrcc5 -o $@ $<) || echo "Skipped: $@"
 
 $(SRC)/pyside_resource%.py: resource.qrc $(UI_FILES)
 	@echo "Buildning resource file: \"$@\""	

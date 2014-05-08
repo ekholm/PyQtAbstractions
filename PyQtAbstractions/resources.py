@@ -18,3 +18,4 @@ if sys.version_info.major == 2:
 elif sys.version_info.major == 3:
     if Qt.isPySide: import PyQtAbstractions.pyside_resource3
     if Qt.isPyQt4:  import PyQtAbstractions.pyqt4_resource3
+    if Qt.isPyQt5:  import PyQtAbstractions.pyqt5_resource3

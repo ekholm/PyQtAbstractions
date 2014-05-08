@@ -8,7 +8,7 @@ import re
 import sys
 import types
 
-# import PyQtAbstractions.decorators as decorators
+#import PyQtAbstractions.decorators as decorators
 import decorators
 
 from __qt_modules__ import *
@@ -133,7 +133,7 @@ def _add_signals(cls):
 def _create_signal_slot(self, f):
     for (n, t) in f._on_signal_operation:
         (args, kargs) = f._signal_types[n]
-        if not Qt.isPyQt4:
+        if not Qt.isPyQt4 and not Qt.isPyQt5:
             f = QtCore.Slot(*args, **kargs)(f)
             setattr(self, f.__name__, f)
         return getattr(self, f.__name__)
@@ -147,7 +147,7 @@ def _create_signal_slots(cls):
             if not hasattr(f, '_signal_types'):
                 f._signal_types = dict()
             f._signal_types[n] = (args, kargs)
-            #if Qt.isPyQt4:
+            #if Qt.isPyQt4 or Qt.isPyQt5:
             #    f = QtCore.Slot(*args, **kargs)(f)
             #    setattr(cls, f.__name__, f)
 

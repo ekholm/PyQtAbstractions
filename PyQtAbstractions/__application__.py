@@ -109,7 +109,7 @@ class _Object(QtCore.QObject, Base):
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # MainWindow
 @ui_class
-class _MainWindow(QtGui.QMainWindow, WidgetBase):
+class _MainWindow(QtWidgets.QMainWindow, WidgetBase):
     """
     Base class for an applications main window
     """
@@ -214,6 +214,7 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
 
         if Qt.isPySide: url  = 'http://www.pyside.org/'
         if Qt.isPyQt4:  url  = 'http://www.riverbankcomputing.co.uk/software/pyqt/'
+        if Qt.isPyQt5:  url  = 'http://www.riverbankcomputing.co.uk/software/pyqt/'
         txt += 'This program uses {:s} v {:s}<br>'.format(PyQt.__name__, PyQt.__version__)
         txt += '<a href="{:s}">{:s}</a><p>'.format(url, url)
             
@@ -235,7 +236,7 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
         WidgetBase._restoreSettings(self)
 
         # Restore last printer used
-        printer = QtGui.QPrinter()
+        printer = QtPrintSupport.QPrinter()
 
         # Now find out if we have a printer already used 
         self._settings.beginGroup("Printer")
@@ -243,9 +244,9 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
         self._settings.endGroup()
 
         # Try to find it amongst the available ones
-        for p in QtGui.QPrinterInfo.availablePrinters():
+        for p in QtPrintSupport.QPrinterInfo.availablePrinters():
             if printerName == p.printerName():
-                printer = QtGui.QPrinter(p) # , mode = QtGui.QPrinter.HighResolution)
+                printer = QtPrintSupport.QPrinter(p) # , mode = QtGui.QPrinter.HighResolution)
                 break
 
         if printer.isValid():
@@ -266,12 +267,12 @@ class _MainWindow(QtGui.QMainWindow, WidgetBase):
         Handles the close event 
         """
         
-        ret = QtGui.QMessageBox.question(self, " " + self.windowTitle() + " ",
-                                         "Do you really want to quit the application",
-                                         QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default,
-                                         QtGui.QMessageBox.No)
+        ret = QtWidgets.QMessageBox.question(self, " " + self.windowTitle() + " ",
+                                             "Do you really want to quit the application",
+                                             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default,
+                                             QtWidgets.QMessageBox.No)
 
-        if ret != QtGui.QMessageBox.StandardButton.Yes:
+        if ret != QtWidgets.QMessageBox.Yes:
             event.ignore()
             return
 

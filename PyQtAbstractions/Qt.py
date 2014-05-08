@@ -41,7 +41,7 @@ if Qt.isPyKDE4:
     import PyQtAbstractions.__applet__      as __app__
     import PyQtAbstractions.__application__ 
     Object = PyQtAbstractions.__application__._Object
-elif Qt.isPySide or Qt.isPyQt4:
+elif Qt.isPySide or Qt.isPyQt4 or Qt.isPyQt5:
     import PyQtAbstractions.__application__ as __app__
     import PyQtAbstractions.__application__ as __app__
     Object = __app__._Object
@@ -59,7 +59,7 @@ class __MetaClass__(type):
 
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Application
-class _Application(QtGui.QApplication):
+class _Application(QtWidgets.QApplication):
     """
     The common base class for a Qt application
     """
@@ -69,12 +69,12 @@ class _Application(QtGui.QApplication):
         The constructor that handles the common data
         """
         
-        QtGui.QApplication.setOrganizationDomain(domain)
-        QtGui.QApplication.setOrganizationName(org)
-        QtGui.QApplication.setApplicationName(app)
-        QtGui.QApplication.setApplicationVersion(ver)
+        QtWidgets.QApplication.setOrganizationDomain(domain)
+        QtWidgets.QApplication.setOrganizationName(org)
+        QtWidgets.QApplication.setApplicationName(app)
+        QtWidgets.QApplication.setApplicationVersion(ver)
 
-        QtGui.QApplication.__init__(self, argv)
+        QtWidgets.QApplication.__init__(self, argv)
 
         # QtGui.QFontDatabase.addApplicationFont(<font path>)
 
@@ -85,7 +85,7 @@ class _Application(QtGui.QApplication):
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # MainWindow
 @ui_class
-class Dialog(QtGui.QDialog, PyQtAbstractions.__bases__.WidgetBase):
+class Dialog(QtWidgets.QDialog, PyQtAbstractions.__bases__.WidgetBase):
     def _connectUI(self):
         PyQtAbstractions.__bases__.WidgetBase._connectUI(self)
         self.buttonBox.accepted.connect(self.accept)
@@ -95,7 +95,7 @@ class Dialog(QtGui.QDialog, PyQtAbstractions.__bases__.WidgetBase):
 # ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### #####
 # Print Preview
 @ui_class
-class PrintPreview(QtGui.QPrintPreviewDialog, PyQtAbstractions.__bases__.WidgetBase):
+class PrintPreview(QtPrintSupport.QPrintPreviewDialog, PyQtAbstractions.__bases__.WidgetBase):
     """
     The print preview dialog
     """
@@ -105,7 +105,7 @@ class PrintPreview(QtGui.QPrintPreviewDialog, PyQtAbstractions.__bases__.WidgetB
         Constructor
         """
 
-        QtGui.QPrintPreviewDialog.__init__(self, printer, parent, flags)
+        QtPrintSupport.QPrintPreviewDialog.__init__(self, printer, parent, flags)
 
         self._settings = parent._settings
 

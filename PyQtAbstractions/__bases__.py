@@ -5,6 +5,7 @@ from PyQtAbstractions.__qt_modules__ import *
 
 import os
 import sys
+import traceback
 
 if Qt.isPySide: 
     import xml.sax
@@ -27,6 +28,8 @@ def _load_ui(form):
             xml.sax.parse(fp, __pyside__.Handler(loader))
             widget = loader.load(form)
         elif Qt.isPyQt4:
+            widget = QtUiTools.loadUi(fp)
+        elif Qt.isPyQt5:
             widget = QtUiTools.loadUi(fp)
         else:
             print("don't know what to do...")
@@ -53,13 +56,17 @@ class _Settings(QtCore.QSettings):
         Constructor that creates the storage location for the application settings
         """
 
-        if appName == None: appName = QtGui.QApplication.applicationName()
-        if orgDom  == None: orgDom  = QtGui.QApplication.organizationDomain()
+        if appName == None: appName = QtWidgets.QApplication.applicationName()
+        if orgDom  == None: orgDom  = QtWidgets.QApplication.organizationDomain()
         
         if os.name == 'posix':
             format = QtCore.QSettings.NativeFormat
-            location = QtGui.QDesktopServices.HomeLocation
-            settingsFile = QtGui.QDesktopServices.storageLocation(location)
+            if Qt.isPyQt5:
+                location     = QtCore.QStandardPaths.HomeLocation
+                settingsFile = QtCore.QStandardPaths.standardLocations(location)[0]
+            else:
+                location = QtGui.QDesktopServices.HomeLocation
+                settingsFile = QtGui.QDesktopServices.storageLocation(location)
             settingsFile += "/.{:s}".format(orgDom)
             settingsFile += "/{:s}.conf".format(appName)
             print(settingsFile)
@@ -74,7 +81,7 @@ class _Settings(QtCore.QSettings):
 
     def value(self, key, defaultValue = None):
         val = QtCore.QSettings.value(self, key, defaultValue)
-        if Qt.isPySide:
+        if Qt.isPySide or Qt.isPyQt5:
             return val
         else:
             return val.toPyObject()
@@ -205,6 +212,7 @@ class Base(object):
                 self._mainForm = self._mainForm
             else:
                 print("Error: form is missing")
+                traceback.print_stack()
                 sys.exit(1)
         
     def run(self):
@@ -302,7 +310,7 @@ class WidgetBase(object):
         self._settings.beginGroup(self.objectName())
         self.move(self._settings.value("pos", QtCore.QPoint(0, 0)))
         self.resize(self._settings.value("size", QtCore.QSize(0, 0)))
-        if isinstance(self, QtGui.QMainWindow):
+        if isinstance(self, QtWidgets.QMainWindow):
             state = self._settings.value("state")
             if state:
                 self.restoreState(state)
@@ -313,7 +321,7 @@ class WidgetBase(object):
         self._settings.beginGroup(self.objectName())
         self._settings.setValue("pos",   self.pos())
         self._settings.setValue("size",  self.size())
-        if isinstance(self, QtGui.QMainWindow):
+        if isinstance(self, QtWidgets.QMainWindow):
             self._settings.setValue("state", self.saveState())
         self._settings.endGroup()
     
